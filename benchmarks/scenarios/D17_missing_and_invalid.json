@@ -1,0 +1,59 @@
+{
+  "scenario_id": "D17",
+  "split": "dev",
+  "description": "Validate and execute an order.",
+  "notes": "",
+  "expected_task_outcome": "failure",
+  "ground_truth_failures": {
+    "missing_required_step": [
+      "e2"
+    ],
+    "invalid_action_sequence": [
+      "e1"
+    ]
+  },
+  "expected_detector_behavior": "Flag missing_required_step citing ['e2']; Flag invalid_action_sequence citing ['e1'].",
+  "expected_correction": "Block completion until all required steps have succeeded. Enforce the prerequisite order between the two actions.",
+  "trace": {
+    "run_id": "D17-missing_and_invalid",
+    "task_description": "Validate and execute an order.",
+    "initial_configuration": {
+      "required_steps": [
+        "validate_input",
+        "execute_order"
+      ],
+      "sequence_rules": [
+        [
+          "validate_input",
+          "execute_order"
+        ]
+      ]
+    },
+    "execution_status": "completed",
+    "events": [
+      {
+        "event_id": "e1",
+        "step_number": 1,
+        "timestamp": "2026-10-12T10:00:01Z",
+        "duration_ms": 100,
+        "event_type": "tool_call",
+        "tool_name": "execute_order",
+        "input": {
+          "order": "A1"
+        },
+        "output": {
+          "id": "X9"
+        },
+        "error_details": null
+      },
+      {
+        "event_id": "e2",
+        "step_number": 2,
+        "timestamp": "2026-10-12T10:00:02Z",
+        "duration_ms": 0,
+        "event_type": "final_answer",
+        "output": "Task complete: order placed."
+      }
+    ]
+  }
+}

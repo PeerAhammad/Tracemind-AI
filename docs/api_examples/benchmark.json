@@ -1,0 +1,899 @@
+{
+  "benchmark_id": "tracemind-benchmark-v1",
+  "total_cases": 28,
+  "true_positives": 21,
+  "false_positives": 1,
+  "true_negatives": 144,
+  "false_negatives": 2,
+  "precision": 0.9545,
+  "recall": 0.913,
+  "task_success_rate_of_recorded_scenarios": 0.4286,
+  "overall": {
+    "tp": 21,
+    "fp": 1,
+    "tn": 144,
+    "fn": 2,
+    "precision": 0.9545,
+    "recall": 0.913,
+    "false_positive_rate": 0.0069,
+    "scenarios": 28,
+    "clean_scenarios": 10,
+    "clean_scenarios_flagged": 1,
+    "exact_match_scenarios": 25,
+    "evidence_hit_rate": 1.0,
+    "per_category": {
+      "repeated_call_no_progress": {
+        "tp": 3,
+        "fp": 0,
+        "tn": 24,
+        "fn": 1,
+        "precision": 1.0,
+        "recall": 0.75,
+        "false_positive_rate": 0.0
+      },
+      "missing_required_step": {
+        "tp": 3,
+        "fp": 0,
+        "tn": 25,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positive_rate": 0.0
+      },
+      "invalid_action_sequence": {
+        "tp": 3,
+        "fp": 0,
+        "tn": 25,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positive_rate": 0.0
+      },
+      "explicit_tool_error": {
+        "tp": 6,
+        "fp": 0,
+        "tn": 22,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positive_rate": 0.0
+      },
+      "unsupported_completion_claim": {
+        "tp": 4,
+        "fp": 1,
+        "tn": 22,
+        "fn": 1,
+        "precision": 0.8,
+        "recall": 0.8,
+        "false_positive_rate": 0.0435
+      },
+      "evidence_constraint_contradiction": {
+        "tp": 2,
+        "fp": 0,
+        "tn": 26,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positive_rate": 0.0
+      }
+    }
+  },
+  "dev": {
+    "tp": 15,
+    "fp": 0,
+    "tn": 93,
+    "fn": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "false_positive_rate": 0.0,
+    "scenarios": 18,
+    "clean_scenarios": 7,
+    "clean_scenarios_flagged": 0,
+    "exact_match_scenarios": 18,
+    "evidence_hit_rate": 1.0,
+    "per_category": {
+      "repeated_call_no_progress": {
+        "tp": 2,
+        "fp": 0,
+        "tn": 16,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positive_rate": 0.0
+      },
+      "missing_required_step": {
+        "tp": 2,
+        "fp": 0,
+        "tn": 16,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positive_rate": 0.0
+      },
+      "invalid_action_sequence": {
+        "tp": 2,
+        "fp": 0,
+        "tn": 16,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positive_rate": 0.0
+      },
+      "explicit_tool_error": {
+        "tp": 4,
+        "fp": 0,
+        "tn": 14,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positive_rate": 0.0
+      },
+      "unsupported_completion_claim": {
+        "tp": 4,
+        "fp": 0,
+        "tn": 14,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positive_rate": 0.0
+      },
+      "evidence_constraint_contradiction": {
+        "tp": 1,
+        "fp": 0,
+        "tn": 17,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positive_rate": 0.0
+      }
+    }
+  },
+  "heldout": {
+    "tp": 6,
+    "fp": 1,
+    "tn": 51,
+    "fn": 2,
+    "precision": 0.8571,
+    "recall": 0.75,
+    "false_positive_rate": 0.0192,
+    "scenarios": 10,
+    "clean_scenarios": 3,
+    "clean_scenarios_flagged": 1,
+    "exact_match_scenarios": 7,
+    "evidence_hit_rate": 1.0,
+    "per_category": {
+      "repeated_call_no_progress": {
+        "tp": 1,
+        "fp": 0,
+        "tn": 8,
+        "fn": 1,
+        "precision": 1.0,
+        "recall": 0.5,
+        "false_positive_rate": 0.0
+      },
+      "missing_required_step": {
+        "tp": 1,
+        "fp": 0,
+        "tn": 9,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positive_rate": 0.0
+      },
+      "invalid_action_sequence": {
+        "tp": 1,
+        "fp": 0,
+        "tn": 9,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positive_rate": 0.0
+      },
+      "explicit_tool_error": {
+        "tp": 2,
+        "fp": 0,
+        "tn": 8,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positive_rate": 0.0
+      },
+      "unsupported_completion_claim": {
+        "tp": 0,
+        "fp": 1,
+        "tn": 8,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "false_positive_rate": 0.1111
+      },
+      "evidence_constraint_contradiction": {
+        "tp": 1,
+        "fp": 0,
+        "tn": 9,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positive_rate": 0.0
+      }
+    }
+  },
+  "scenario_results": [
+    {
+      "scenario_id": "D01",
+      "split": "dev",
+      "truth": {},
+      "predicted": {},
+      "true_positives": [],
+      "false_positives": [],
+      "false_negatives": [],
+      "evidence_hits": {},
+      "detector_errors": []
+    },
+    {
+      "scenario_id": "D02",
+      "split": "dev",
+      "truth": {},
+      "predicted": {},
+      "true_positives": [],
+      "false_positives": [],
+      "false_negatives": [],
+      "evidence_hits": {},
+      "detector_errors": []
+    },
+    {
+      "scenario_id": "D03",
+      "split": "dev",
+      "truth": {
+        "repeated_call_no_progress": [
+          "e1",
+          "e2",
+          "e3"
+        ],
+        "unsupported_completion_claim": [
+          "e4",
+          "e5"
+        ]
+      },
+      "predicted": {
+        "repeated_call_no_progress": [
+          "e1",
+          "e2",
+          "e3"
+        ],
+        "unsupported_completion_claim": [
+          "e3",
+          "e4",
+          "e5"
+        ]
+      },
+      "true_positives": [
+        "repeated_call_no_progress",
+        "unsupported_completion_claim"
+      ],
+      "false_positives": [],
+      "false_negatives": [],
+      "evidence_hits": {
+        "repeated_call_no_progress": true,
+        "unsupported_completion_claim": true
+      },
+      "detector_errors": []
+    },
+    {
+      "scenario_id": "D04",
+      "split": "dev",
+      "truth": {
+        "repeated_call_no_progress": [
+          "e1",
+          "e2",
+          "e3",
+          "e4",
+          "e5"
+        ],
+        "explicit_tool_error": [
+          "e1"
+        ]
+      },
+      "predicted": {
+        "repeated_call_no_progress": [
+          "e1",
+          "e2",
+          "e3",
+          "e4",
+          "e5"
+        ],
+        "explicit_tool_error": [
+          "e1",
+          "e2",
+          "e3",
+          "e4",
+          "e5"
+        ]
+      },
+      "true_positives": [
+        "repeated_call_no_progress",
+        "explicit_tool_error"
+      ],
+      "false_positives": [],
+      "false_negatives": [],
+      "evidence_hits": {
+        "repeated_call_no_progress": true,
+        "explicit_tool_error": true
+      },
+      "detector_errors": []
+    },
+    {
+      "scenario_id": "D05",
+      "split": "dev",
+      "truth": {
+        "explicit_tool_error": [
+          "e1"
+        ]
+      },
+      "predicted": {
+        "explicit_tool_error": [
+          "e1",
+          "e2"
+        ]
+      },
+      "true_positives": [
+        "explicit_tool_error"
+      ],
+      "false_positives": [],
+      "false_negatives": [],
+      "evidence_hits": {
+        "explicit_tool_error": true
+      },
+      "detector_errors": []
+    },
+    {
+      "scenario_id": "D06",
+      "split": "dev",
+      "truth": {},
+      "predicted": {},
+      "true_positives": [],
+      "false_positives": [],
+      "false_negatives": [],
+      "evidence_hits": {},
+      "detector_errors": []
+    },
+    {
+      "scenario_id": "D07",
+      "split": "dev",
+      "truth": {
+        "unsupported_completion_claim": [
+          "e5",
+          "e6"
+        ]
+      },
+      "predicted": {
+        "unsupported_completion_claim": [
+          "e4",
+          "e5",
+          "e6"
+        ]
+      },
+      "true_positives": [
+        "unsupported_completion_claim"
+      ],
+      "false_positives": [],
+      "false_negatives": [],
+      "evidence_hits": {
+        "unsupported_completion_claim": true
+      },
+      "detector_errors": []
+    },
+    {
+      "scenario_id": "D08",
+      "split": "dev",
+      "truth": {
+        "explicit_tool_error": [
+          "e1"
+        ],
+        "unsupported_completion_claim": [
+          "e1",
+          "e2"
+        ]
+      },
+      "predicted": {
+        "explicit_tool_error": [
+          "e1"
+        ],
+        "unsupported_completion_claim": [
+          "e1",
+          "e2"
+        ]
+      },
+      "true_positives": [
+        "explicit_tool_error",
+        "unsupported_completion_claim"
+      ],
+      "false_positives": [],
+      "false_negatives": [],
+      "evidence_hits": {
+        "explicit_tool_error": true,
+        "unsupported_completion_claim": true
+      },
+      "detector_errors": []
+    },
+    {
+      "scenario_id": "D09",
+      "split": "dev",
+      "truth": {
+        "explicit_tool_error": [
+          "e1"
+        ]
+      },
+      "predicted": {
+        "explicit_tool_error": [
+          "e1"
+        ]
+      },
+      "true_positives": [
+        "explicit_tool_error"
+      ],
+      "false_positives": [],
+      "false_negatives": [],
+      "evidence_hits": {
+        "explicit_tool_error": true
+      },
+      "detector_errors": []
+    },
+    {
+      "scenario_id": "D10",
+      "split": "dev",
+      "truth": {
+        "missing_required_step": [
+          "e2"
+        ]
+      },
+      "predicted": {
+        "missing_required_step": [
+          "e2"
+        ]
+      },
+      "true_positives": [
+        "missing_required_step"
+      ],
+      "false_positives": [],
+      "false_negatives": [],
+      "evidence_hits": {
+        "missing_required_step": true
+      },
+      "detector_errors": []
+    },
+    {
+      "scenario_id": "D11",
+      "split": "dev",
+      "truth": {},
+      "predicted": {},
+      "true_positives": [],
+      "false_positives": [],
+      "false_negatives": [],
+      "evidence_hits": {},
+      "detector_errors": []
+    },
+    {
+      "scenario_id": "D12",
+      "split": "dev",
+      "truth": {
+        "invalid_action_sequence": [
+          "e1"
+        ]
+      },
+      "predicted": {
+        "invalid_action_sequence": [
+          "e1"
+        ]
+      },
+      "true_positives": [
+        "invalid_action_sequence"
+      ],
+      "false_positives": [],
+      "false_negatives": [],
+      "evidence_hits": {
+        "invalid_action_sequence": true
+      },
+      "detector_errors": []
+    },
+    {
+      "scenario_id": "D13",
+      "split": "dev",
+      "truth": {},
+      "predicted": {},
+      "true_positives": [],
+      "false_positives": [],
+      "false_negatives": [],
+      "evidence_hits": {},
+      "detector_errors": []
+    },
+    {
+      "scenario_id": "D14",
+      "split": "dev",
+      "truth": {
+        "evidence_constraint_contradiction": [
+          "e1",
+          "e3"
+        ]
+      },
+      "predicted": {
+        "evidence_constraint_contradiction": [
+          "e1",
+          "e3"
+        ]
+      },
+      "true_positives": [
+        "evidence_constraint_contradiction"
+      ],
+      "false_positives": [],
+      "false_negatives": [],
+      "evidence_hits": {
+        "evidence_constraint_contradiction": true
+      },
+      "detector_errors": []
+    },
+    {
+      "scenario_id": "D15",
+      "split": "dev",
+      "truth": {},
+      "predicted": {},
+      "true_positives": [],
+      "false_positives": [],
+      "false_negatives": [],
+      "evidence_hits": {},
+      "detector_errors": []
+    },
+    {
+      "scenario_id": "D16",
+      "split": "dev",
+      "truth": {
+        "unsupported_completion_claim": [
+          "e2",
+          "e3"
+        ]
+      },
+      "predicted": {
+        "unsupported_completion_claim": [
+          "e1",
+          "e2",
+          "e3"
+        ]
+      },
+      "true_positives": [
+        "unsupported_completion_claim"
+      ],
+      "false_positives": [],
+      "false_negatives": [],
+      "evidence_hits": {
+        "unsupported_completion_claim": true
+      },
+      "detector_errors": []
+    },
+    {
+      "scenario_id": "D17",
+      "split": "dev",
+      "truth": {
+        "missing_required_step": [
+          "e2"
+        ],
+        "invalid_action_sequence": [
+          "e1"
+        ]
+      },
+      "predicted": {
+        "invalid_action_sequence": [
+          "e1"
+        ],
+        "missing_required_step": [
+          "e2"
+        ]
+      },
+      "true_positives": [
+        "missing_required_step",
+        "invalid_action_sequence"
+      ],
+      "false_positives": [],
+      "false_negatives": [],
+      "evidence_hits": {
+        "missing_required_step": true,
+        "invalid_action_sequence": true
+      },
+      "detector_errors": []
+    },
+    {
+      "scenario_id": "D18",
+      "split": "dev",
+      "truth": {},
+      "predicted": {},
+      "true_positives": [],
+      "false_positives": [],
+      "false_negatives": [],
+      "evidence_hits": {},
+      "detector_errors": []
+    },
+    {
+      "scenario_id": "H01",
+      "split": "heldout",
+      "truth": {
+        "repeated_call_no_progress": [
+          "e1",
+          "e2",
+          "e3",
+          "e4"
+        ],
+        "explicit_tool_error": [
+          "e1"
+        ]
+      },
+      "predicted": {
+        "repeated_call_no_progress": [
+          "e1",
+          "e2",
+          "e3",
+          "e4"
+        ],
+        "explicit_tool_error": [
+          "e1",
+          "e2",
+          "e3",
+          "e4"
+        ]
+      },
+      "true_positives": [
+        "repeated_call_no_progress",
+        "explicit_tool_error"
+      ],
+      "false_positives": [],
+      "false_negatives": [],
+      "evidence_hits": {
+        "repeated_call_no_progress": true,
+        "explicit_tool_error": true
+      },
+      "detector_errors": []
+    },
+    {
+      "scenario_id": "H02",
+      "split": "heldout",
+      "truth": {},
+      "predicted": {},
+      "true_positives": [],
+      "false_positives": [],
+      "false_negatives": [],
+      "evidence_hits": {},
+      "detector_errors": []
+    },
+    {
+      "scenario_id": "H03",
+      "split": "heldout",
+      "truth": {
+        "explicit_tool_error": [
+          "e1"
+        ]
+      },
+      "predicted": {
+        "explicit_tool_error": [
+          "e1",
+          "e2"
+        ]
+      },
+      "true_positives": [
+        "explicit_tool_error"
+      ],
+      "false_positives": [],
+      "false_negatives": [],
+      "evidence_hits": {
+        "explicit_tool_error": true
+      },
+      "detector_errors": []
+    },
+    {
+      "scenario_id": "H04",
+      "split": "heldout",
+      "truth": {
+        "missing_required_step": [
+          "e3"
+        ]
+      },
+      "predicted": {
+        "missing_required_step": [
+          "e3"
+        ]
+      },
+      "true_positives": [
+        "missing_required_step"
+      ],
+      "false_positives": [],
+      "false_negatives": [],
+      "evidence_hits": {
+        "missing_required_step": true
+      },
+      "detector_errors": []
+    },
+    {
+      "scenario_id": "H05",
+      "split": "heldout",
+      "truth": {
+        "invalid_action_sequence": [
+          "e1"
+        ]
+      },
+      "predicted": {
+        "invalid_action_sequence": [
+          "e1"
+        ]
+      },
+      "true_positives": [
+        "invalid_action_sequence"
+      ],
+      "false_positives": [],
+      "false_negatives": [],
+      "evidence_hits": {
+        "invalid_action_sequence": true
+      },
+      "detector_errors": []
+    },
+    {
+      "scenario_id": "H06",
+      "split": "heldout",
+      "truth": {
+        "evidence_constraint_contradiction": [
+          "e1",
+          "e2"
+        ]
+      },
+      "predicted": {
+        "evidence_constraint_contradiction": [
+          "e1",
+          "e2"
+        ]
+      },
+      "true_positives": [
+        "evidence_constraint_contradiction"
+      ],
+      "false_positives": [],
+      "false_negatives": [],
+      "evidence_hits": {
+        "evidence_constraint_contradiction": true
+      },
+      "detector_errors": []
+    },
+    {
+      "scenario_id": "H07",
+      "split": "heldout",
+      "truth": {
+        "repeated_call_no_progress": [
+          "e1",
+          "e2",
+          "e3",
+          "e4",
+          "e5",
+          "e6"
+        ]
+      },
+      "predicted": {},
+      "true_positives": [],
+      "false_positives": [],
+      "false_negatives": [
+        "repeated_call_no_progress"
+      ],
+      "evidence_hits": {},
+      "detector_errors": []
+    },
+    {
+      "scenario_id": "H08",
+      "split": "heldout",
+      "truth": {
+        "unsupported_completion_claim": [
+          "e1",
+          "e2"
+        ]
+      },
+      "predicted": {},
+      "true_positives": [],
+      "false_positives": [],
+      "false_negatives": [
+        "unsupported_completion_claim"
+      ],
+      "evidence_hits": {},
+      "detector_errors": []
+    },
+    {
+      "scenario_id": "H09",
+      "split": "heldout",
+      "truth": {},
+      "predicted": {
+        "unsupported_completion_claim": [
+          "e1",
+          "e2",
+          "e3"
+        ]
+      },
+      "true_positives": [],
+      "false_positives": [
+        "unsupported_completion_claim"
+      ],
+      "false_negatives": [],
+      "evidence_hits": {},
+      "detector_errors": []
+    },
+    {
+      "scenario_id": "H10",
+      "split": "heldout",
+      "truth": {},
+      "predicted": {},
+      "true_positives": [],
+      "false_positives": [],
+      "false_negatives": [],
+      "evidence_hits": {},
+      "detector_errors": []
+    }
+  ],
+  "runner_sweep": {
+    "baseline_config": {
+      "max_retries": 2,
+      "reformulate_on_empty": false,
+      "require_retrieval_before_summary": false
+    },
+    "candidate_config": {
+      "max_retries": 1,
+      "reformulate_on_empty": true,
+      "require_retrieval_before_summary": true
+    },
+    "rows": [
+      {
+        "task_id": "flaky_search_retry",
+        "outcome_before": "success",
+        "outcome_after": "success",
+        "tool_calls_before": 3,
+        "tool_calls_after": 3,
+        "duration_ms_before": 540.0,
+        "duration_ms_after": 540.0,
+        "findings_before": 1,
+        "findings_after": 1
+      },
+      {
+        "task_id": "refund_empty_search",
+        "outcome_before": "failure",
+        "outcome_after": "success",
+        "tool_calls_before": 4,
+        "tool_calls_after": 3,
+        "duration_ms_before": 660.0,
+        "duration_ms_after": 540.0,
+        "findings_before": 2,
+        "findings_after": 0
+      },
+      {
+        "task_id": "refund_ok",
+        "outcome_before": "success",
+        "outcome_after": "success",
+        "tool_calls_before": 2,
+        "tool_calls_after": 2,
+        "duration_ms_before": 420.0,
+        "duration_ms_after": 420.0,
+        "findings_before": 0,
+        "findings_after": 0
+      }
+    ],
+    "tasks": 3,
+    "completion_rate_before": 0.6666666666666666,
+    "completion_rate_after": 1.0,
+    "tool_calls_before": 9,
+    "tool_calls_after": 8,
+    "duration_ms_before": 1620.0,
+    "duration_ms_after": 1500.0,
+    "tasks_fixed": [
+      "refund_empty_search"
+    ],
+    "tasks_regressed": [],
+    "data_source": "live measurement from deterministic mock-tool runs; durations are simulated"
+  },
+  "limitations": [
+    "28 hand-written scenarios: far too few to establish general reliability of the detectors.",
+    "Ground truth, detectors and scenarios were all written by the same team; the held-out set was written after the detector code was frozen, but it is not independent or blind.",
+    "Traces are synthetic and short; real agent traces are noisier.",
+    "Missing-step, invalid-sequence and contradiction detectors only work when the trace configuration declares required_steps, sequence_rules or constraints.",
+    "Corrective-change effects are measured only on the 3 runnable tasks (runner_sweep), not on every scenario.",
+    "Durations in runner_sweep are simulated by deterministic mock tools; token usage is not measured."
+  ],
+  "data_source": "live computation over labelled benchmark scenarios"
+}

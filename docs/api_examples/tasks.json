@@ -1,0 +1,14 @@
+[
+  {
+    "task_id": "flaky_search_retry",
+    "description": "Find the shipping policy in the docs and summarize it. The search service fails on its first call."
+  },
+  {
+    "task_id": "refund_empty_search",
+    "description": "Find the refund policy in the docs and summarize it."
+  },
+  {
+    "task_id": "refund_ok",
+    "description": "Find the refund policy in the docs and summarize it."
+  }
+]

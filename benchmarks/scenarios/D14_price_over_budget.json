@@ -1,0 +1,70 @@
+{
+  "scenario_id": "D14",
+  "split": "dev",
+  "description": "Book a flight to BOM under 500.",
+  "notes": "",
+  "expected_task_outcome": "failure",
+  "ground_truth_failures": {
+    "evidence_constraint_contradiction": [
+      "e1",
+      "e3"
+    ]
+  },
+  "expected_detector_behavior": "Flag evidence_constraint_contradiction citing ['e1', 'e3'].",
+  "expected_correction": "Check tool outputs against task constraints before declaring completion.",
+  "trace": {
+    "run_id": "D14-price_over_budget",
+    "task_description": "Book a flight to BOM under 500.",
+    "initial_configuration": {
+      "constraints": [
+        {
+          "tool": "search_flights",
+          "field": "price",
+          "max": 500
+        }
+      ]
+    },
+    "execution_status": "completed",
+    "events": [
+      {
+        "event_id": "e1",
+        "step_number": 1,
+        "timestamp": "2026-10-12T10:00:01Z",
+        "duration_ms": 100,
+        "event_type": "tool_call",
+        "tool_name": "search_flights",
+        "input": {
+          "to": "BOM"
+        },
+        "output": {
+          "price": 720,
+          "flight": "AI101"
+        },
+        "error_details": null
+      },
+      {
+        "event_id": "e2",
+        "step_number": 2,
+        "timestamp": "2026-10-12T10:00:02Z",
+        "duration_ms": 100,
+        "event_type": "tool_call",
+        "tool_name": "book_flight",
+        "input": {
+          "flight": "AI101"
+        },
+        "output": {
+          "booked": true
+        },
+        "error_details": null
+      },
+      {
+        "event_id": "e3",
+        "step_number": 3,
+        "timestamp": "2026-10-12T10:00:03Z",
+        "duration_ms": 0,
+        "event_type": "final_answer",
+        "output": "Booked AI101 for 720. Task complete."
+      }
+    ]
+  }
+}

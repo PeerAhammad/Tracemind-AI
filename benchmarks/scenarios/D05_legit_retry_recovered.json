@@ -1,0 +1,78 @@
+{
+  "scenario_id": "D05",
+  "split": "dev",
+  "description": "Find the refund policy and summarize it.",
+  "notes": "Legitimate retry: the error is recorded, but the retry must NOT be flagged as a repeated call.",
+  "expected_task_outcome": "success",
+  "ground_truth_failures": {
+    "explicit_tool_error": [
+      "e1"
+    ]
+  },
+  "expected_detector_behavior": "Flag explicit_tool_error citing ['e1'].",
+  "expected_correction": "Validate inputs and handle the error (bounded retry, fallback, or report failure).",
+  "trace": {
+    "run_id": "D05-legit_retry_recovered",
+    "task_description": "Find the refund policy and summarize it.",
+    "initial_configuration": {},
+    "execution_status": "completed",
+    "events": [
+      {
+        "event_id": "e1",
+        "step_number": 1,
+        "timestamp": "2026-10-12T10:00:01Z",
+        "duration_ms": 100,
+        "event_type": "tool_call",
+        "tool_name": "search_docs",
+        "input": {
+          "query": "refund policy"
+        },
+        "output": null,
+        "error_details": "503 timeout"
+      },
+      {
+        "event_id": "e2",
+        "step_number": 2,
+        "timestamp": "2026-10-12T10:00:02Z",
+        "duration_ms": 100,
+        "event_type": "tool_call",
+        "tool_name": "search_docs",
+        "input": {
+          "query": "refund policy"
+        },
+        "output": {
+          "results": [
+            {
+              "title": "Refund Policy",
+              "text": "Refunds are available within 30 days."
+            }
+          ]
+        },
+        "error_details": null
+      },
+      {
+        "event_id": "e3",
+        "step_number": 3,
+        "timestamp": "2026-10-12T10:00:03Z",
+        "duration_ms": 100,
+        "event_type": "tool_call",
+        "tool_name": "summarize",
+        "input": {
+          "text": "Refunds are available within 30 days."
+        },
+        "output": {
+          "summary": "Refunds are available within 30 days."
+        },
+        "error_details": null
+      },
+      {
+        "event_id": "e4",
+        "step_number": 4,
+        "timestamp": "2026-10-12T10:00:04Z",
+        "duration_ms": 0,
+        "event_type": "final_answer",
+        "output": "Task complete: refunds within 30 days."
+      }
+    ]
+  }
+}

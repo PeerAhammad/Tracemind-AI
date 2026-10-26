@@ -1,0 +1,45 @@
+{
+  "malformed_json_upload_400": {
+    "detail": "Invalid JSON: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"
+  },
+  "invalid_schema_upload_422": {
+    "detail": [
+      {
+        "type": "missing",
+        "loc": [
+          "task_description"
+        ],
+        "msg": "Field required",
+        "input": {
+          "run_id": "x"
+        }
+      },
+      {
+        "type": "missing",
+        "loc": [
+          "events"
+        ],
+        "msg": "Field required",
+        "input": {
+          "run_id": "x"
+        }
+      },
+      {
+        "type": "missing",
+        "loc": [
+          "execution_status"
+        ],
+        "msg": "Field required",
+        "input": {
+          "run_id": "x"
+        }
+      }
+    ]
+  },
+  "replay_not_approved_400": {
+    "detail": "Corrections must be explicitly approved (approved: true) before replay."
+  },
+  "unknown_run_404": {
+    "detail": "Run not found"
+  }
+}

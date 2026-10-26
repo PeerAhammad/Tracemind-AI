@@ -1,0 +1,10 @@
+{
+  "task_id": "flaky_search_retry",
+  "description": "Find the shipping policy in the docs and summarize it. The search service fails on its first call.",
+  "query": "shipping policy",
+  "fallback_queries": ["shipping"],
+  "corpus": {"shipping policy": [{"title": "Shipping Policy", "text": "Orders ship within 2 business days."}]},
+  "fail_first_calls": 1,
+  "expected_fact": "within 2 business days",
+  "ungrounded_summary": "Orders ship within 2 business days."
+}

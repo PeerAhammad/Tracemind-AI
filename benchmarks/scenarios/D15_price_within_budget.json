@@ -1,0 +1,65 @@
+{
+  "scenario_id": "D15",
+  "split": "dev",
+  "description": "Book a flight to BOM under 500.",
+  "notes": "",
+  "expected_task_outcome": "success",
+  "ground_truth_failures": {},
+  "expected_detector_behavior": "No finding expected.",
+  "expected_correction": "None needed.",
+  "trace": {
+    "run_id": "D15-price_within_budget",
+    "task_description": "Book a flight to BOM under 500.",
+    "initial_configuration": {
+      "constraints": [
+        {
+          "tool": "search_flights",
+          "field": "price",
+          "max": 500
+        }
+      ]
+    },
+    "execution_status": "completed",
+    "events": [
+      {
+        "event_id": "e1",
+        "step_number": 1,
+        "timestamp": "2026-10-12T10:00:01Z",
+        "duration_ms": 100,
+        "event_type": "tool_call",
+        "tool_name": "search_flights",
+        "input": {
+          "to": "BOM"
+        },
+        "output": {
+          "price": 450,
+          "flight": "AI202"
+        },
+        "error_details": null
+      },
+      {
+        "event_id": "e2",
+        "step_number": 2,
+        "timestamp": "2026-10-12T10:00:02Z",
+        "duration_ms": 100,
+        "event_type": "tool_call",
+        "tool_name": "book_flight",
+        "input": {
+          "flight": "AI202"
+        },
+        "output": {
+          "booked": true
+        },
+        "error_details": null
+      },
+      {
+        "event_id": "e3",
+        "step_number": 3,
+        "timestamp": "2026-10-12T10:00:03Z",
+        "duration_ms": 0,
+        "event_type": "final_answer",
+        "output": "Booked AI202 for 450. Task complete."
+      }
+    ]
+  }
+}

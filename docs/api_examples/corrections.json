@@ -1,0 +1,35 @@
+{
+  "run_id": "run-2e2ed5b6",
+  "corrections": [
+    {
+      "correction_id": "run-2e2ed5b6:limit_retries",
+      "title": "Limit retries and change the query after an empty result",
+      "description": "Cap retries at 1 and try a fallback query instead of repeating the same one.",
+      "finding_ids": [
+        "run-2e2ed5b6:repeated_call:e1"
+      ],
+      "config_changes": {
+        "max_retries": 1,
+        "reformulate_on_empty": true
+      },
+      "requires_approval": true
+    },
+    {
+      "correction_id": "run-2e2ed5b6:require_retrieval",
+      "title": "Require a successful retrieval before summarizing",
+      "description": "Refuse to summarize without retrieved documents and report failure honestly instead of claiming success.",
+      "finding_ids": [
+        "run-2e2ed5b6:unsupported_completion:empty_dataflow"
+      ],
+      "config_changes": {
+        "require_retrieval_before_summary": true
+      },
+      "requires_approval": true
+    }
+  ],
+  "combined_changes": {
+    "max_retries": 1,
+    "reformulate_on_empty": true,
+    "require_retrieval_before_summary": true
+  }
+}

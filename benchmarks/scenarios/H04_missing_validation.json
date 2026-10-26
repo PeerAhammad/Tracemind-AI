@@ -1,0 +1,66 @@
+{
+  "scenario_id": "H04",
+  "split": "heldout",
+  "description": "Fetch, validate and report data.",
+  "notes": "",
+  "expected_task_outcome": "failure",
+  "ground_truth_failures": {
+    "missing_required_step": [
+      "e3"
+    ]
+  },
+  "expected_detector_behavior": "Flag missing_required_step citing ['e3'].",
+  "expected_correction": "Block completion until all required steps have succeeded.",
+  "trace": {
+    "run_id": "H04-missing_validation",
+    "task_description": "Fetch, validate and report data.",
+    "initial_configuration": {
+      "required_steps": [
+        "fetch_data",
+        "validate_data",
+        "report"
+      ]
+    },
+    "execution_status": "completed",
+    "events": [
+      {
+        "event_id": "e1",
+        "step_number": 1,
+        "timestamp": "2026-10-12T10:00:01Z",
+        "duration_ms": 100,
+        "event_type": "tool_call",
+        "tool_name": "fetch_data",
+        "input": {
+          "src": "db"
+        },
+        "output": {
+          "rows": 10
+        },
+        "error_details": null
+      },
+      {
+        "event_id": "e2",
+        "step_number": 2,
+        "timestamp": "2026-10-12T10:00:02Z",
+        "duration_ms": 100,
+        "event_type": "tool_call",
+        "tool_name": "report",
+        "input": {
+          "rows": 10
+        },
+        "output": {
+          "ok": true
+        },
+        "error_details": null
+      },
+      {
+        "event_id": "e3",
+        "step_number": 3,
+        "timestamp": "2026-10-12T10:00:03Z",
+        "duration_ms": 0,
+        "event_type": "final_answer",
+        "output": "Task complete: report sent."
+      }
+    ]
+  }
+}

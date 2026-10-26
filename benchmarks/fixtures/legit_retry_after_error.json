@@ -1,0 +1,67 @@
+{
+  "run_id": "retry-001",
+  "task_description": "Find the refund policy in the docs and summarize it.",
+  "initial_configuration": {},
+  "execution_status": "completed",
+  "events": [
+    {
+      "event_id": "e1",
+      "step_number": 1,
+      "event_type": "tool_call",
+      "tool_name": "search_docs",
+      "input": {
+        "query": "refund policy"
+      },
+      "output": null,
+      "error_details": "503 service unavailable (timeout)",
+      "timestamp": "2026-10-12T10:00:01Z",
+      "duration_ms": 100
+    },
+    {
+      "event_id": "e2",
+      "step_number": 2,
+      "event_type": "tool_call",
+      "tool_name": "search_docs",
+      "input": {
+        "query": "refund policy"
+      },
+      "output": {
+        "results": [
+          {
+            "title": "Refund Policy",
+            "text": "Refunds are available within 30 days."
+          }
+        ]
+      },
+      "error_details": null,
+      "timestamp": "2026-10-12T10:00:02Z",
+      "duration_ms": 100
+    },
+    {
+      "event_id": "e3",
+      "step_number": 3,
+      "event_type": "tool_call",
+      "tool_name": "summarize",
+      "input": {
+        "text": "Refunds are available within 30 days."
+      },
+      "output": {
+        "summary": "Refunds within 30 days."
+      },
+      "error_details": null,
+      "timestamp": "2026-10-12T10:00:03Z",
+      "duration_ms": 100
+    },
+    {
+      "event_id": "e4",
+      "step_number": 4,
+      "event_type": "final_answer",
+      "tool_name": null,
+      "input": {},
+      "output": "Task complete: refunds are available within 30 days.",
+      "error_details": null,
+      "timestamp": "2026-10-12T10:00:04Z",
+      "duration_ms": 100
+    }
+  ]
+}

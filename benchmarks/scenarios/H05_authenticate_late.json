@@ -1,0 +1,67 @@
+{
+  "scenario_id": "H05",
+  "split": "heldout",
+  "description": "Fetch customer records.",
+  "notes": "",
+  "expected_task_outcome": "failure",
+  "ground_truth_failures": {
+    "invalid_action_sequence": [
+      "e1"
+    ]
+  },
+  "expected_detector_behavior": "Flag invalid_action_sequence citing ['e1'].",
+  "expected_correction": "Enforce the prerequisite order between the two actions.",
+  "trace": {
+    "run_id": "H05-authenticate_late",
+    "task_description": "Fetch customer records.",
+    "initial_configuration": {
+      "sequence_rules": [
+        [
+          "authenticate",
+          "fetch_records"
+        ]
+      ]
+    },
+    "execution_status": "completed",
+    "events": [
+      {
+        "event_id": "e1",
+        "step_number": 1,
+        "timestamp": "2026-10-12T10:00:01Z",
+        "duration_ms": 100,
+        "event_type": "tool_call",
+        "tool_name": "fetch_records",
+        "input": {
+          "customer": 5
+        },
+        "output": {
+          "records": 3
+        },
+        "error_details": null
+      },
+      {
+        "event_id": "e2",
+        "step_number": 2,
+        "timestamp": "2026-10-12T10:00:02Z",
+        "duration_ms": 100,
+        "event_type": "tool_call",
+        "tool_name": "authenticate",
+        "input": {
+          "user": "bot"
+        },
+        "output": {
+          "token": "t"
+        },
+        "error_details": null
+      },
+      {
+        "event_id": "e3",
+        "step_number": 3,
+        "timestamp": "2026-10-12T10:00:03Z",
+        "duration_ms": 0,
+        "event_type": "final_answer",
+        "output": "Task complete: records fetched."
+      }
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "task_id": "refund_ok",
+  "description": "Find the refund policy in the docs and summarize it.",
+  "query": "refund policy",
+  "fallback_queries": ["refunds"],
+  "corpus": {"refund policy": [{"title": "Refund Policy", "text": "Refunds are available within 30 days."}]},
+  "fail_first_calls": 0,
+  "expected_fact": "within 30 days",
+  "ungrounded_summary": "Refunds are available within 30 days."
+}

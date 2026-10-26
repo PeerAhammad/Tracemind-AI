@@ -1,0 +1,267 @@
+[
+  {
+    "scenario_id": "D01",
+    "split": "dev",
+    "description": "Find the refund policy and summarize it.",
+    "expected_task_outcome": "success",
+    "ground_truth_categories": [],
+    "notes": ""
+  },
+  {
+    "scenario_id": "D02",
+    "split": "dev",
+    "description": "Validate, execute and receipt an order.",
+    "expected_task_outcome": "success",
+    "ground_truth_categories": [],
+    "notes": ""
+  },
+  {
+    "scenario_id": "D03",
+    "split": "dev",
+    "description": "Find the refund policy and summarize it.",
+    "expected_task_outcome": "failure",
+    "ground_truth_categories": [
+      "repeated_call_no_progress",
+      "unsupported_completion_claim"
+    ],
+    "notes": ""
+  },
+  {
+    "scenario_id": "D04",
+    "split": "dev",
+    "description": "Find the refund policy and summarize it.",
+    "expected_task_outcome": "failure",
+    "ground_truth_categories": [
+      "explicit_tool_error",
+      "repeated_call_no_progress"
+    ],
+    "notes": ""
+  },
+  {
+    "scenario_id": "D05",
+    "split": "dev",
+    "description": "Find the refund policy and summarize it.",
+    "expected_task_outcome": "success",
+    "ground_truth_categories": [
+      "explicit_tool_error"
+    ],
+    "notes": "Legitimate retry: the error is recorded, but the retry must NOT be flagged as a repeated call."
+  },
+  {
+    "scenario_id": "D06",
+    "split": "dev",
+    "description": "Wait for job 7 to finish.",
+    "expected_task_outcome": "success",
+    "ground_truth_categories": [],
+    "notes": "Legitimate polling: the result changes, so no failure."
+  },
+  {
+    "scenario_id": "D07",
+    "split": "dev",
+    "description": "Find the refund policy and summarize it.",
+    "expected_task_outcome": "failure",
+    "ground_truth_categories": [
+      "unsupported_completion_claim"
+    ],
+    "notes": "Inputs change each time, so this is not a repeated call; the unsupported claim is the failure."
+  },
+  {
+    "scenario_id": "D08",
+    "split": "dev",
+    "description": "Find the refund policy and summarize it.",
+    "expected_task_outcome": "failure",
+    "ground_truth_categories": [
+      "explicit_tool_error",
+      "unsupported_completion_claim"
+    ],
+    "notes": ""
+  },
+  {
+    "scenario_id": "D09",
+    "split": "dev",
+    "description": "Find the refund policy and summarize it.",
+    "expected_task_outcome": "failure",
+    "ground_truth_categories": [
+      "explicit_tool_error"
+    ],
+    "notes": ""
+  },
+  {
+    "scenario_id": "D10",
+    "split": "dev",
+    "description": "Validate and execute an order.",
+    "expected_task_outcome": "failure",
+    "ground_truth_categories": [
+      "missing_required_step"
+    ],
+    "notes": ""
+  },
+  {
+    "scenario_id": "D11",
+    "split": "dev",
+    "description": "Validate and execute an order.",
+    "expected_task_outcome": "success",
+    "ground_truth_categories": [],
+    "notes": ""
+  },
+  {
+    "scenario_id": "D12",
+    "split": "dev",
+    "description": "Find the refund policy and summarize it.",
+    "expected_task_outcome": "failure",
+    "ground_truth_categories": [
+      "invalid_action_sequence"
+    ],
+    "notes": ""
+  },
+  {
+    "scenario_id": "D13",
+    "split": "dev",
+    "description": "Find the refund policy and summarize it.",
+    "expected_task_outcome": "success",
+    "ground_truth_categories": [],
+    "notes": ""
+  },
+  {
+    "scenario_id": "D14",
+    "split": "dev",
+    "description": "Book a flight to BOM under 500.",
+    "expected_task_outcome": "failure",
+    "ground_truth_categories": [
+      "evidence_constraint_contradiction"
+    ],
+    "notes": ""
+  },
+  {
+    "scenario_id": "D15",
+    "split": "dev",
+    "description": "Book a flight to BOM under 500.",
+    "expected_task_outcome": "success",
+    "ground_truth_categories": [],
+    "notes": ""
+  },
+  {
+    "scenario_id": "D16",
+    "split": "dev",
+    "description": "Find the refund policy and summarize it.",
+    "expected_task_outcome": "failure",
+    "ground_truth_categories": [
+      "unsupported_completion_claim"
+    ],
+    "notes": ""
+  },
+  {
+    "scenario_id": "D17",
+    "split": "dev",
+    "description": "Validate and execute an order.",
+    "expected_task_outcome": "failure",
+    "ground_truth_categories": [
+      "invalid_action_sequence",
+      "missing_required_step"
+    ],
+    "notes": ""
+  },
+  {
+    "scenario_id": "D18",
+    "split": "dev",
+    "description": "Find the refund policy and summarize it.",
+    "expected_task_outcome": "success",
+    "ground_truth_categories": [],
+    "notes": "Two identical successful calls: below the repeat threshold."
+  },
+  {
+    "scenario_id": "H01",
+    "split": "heldout",
+    "description": "Find the refund policy and summarize it.",
+    "expected_task_outcome": "failure",
+    "ground_truth_categories": [
+      "explicit_tool_error",
+      "repeated_call_no_progress"
+    ],
+    "notes": ""
+  },
+  {
+    "scenario_id": "H02",
+    "split": "heldout",
+    "description": "Fetch, validate and report data.",
+    "expected_task_outcome": "success",
+    "ground_truth_categories": [],
+    "notes": ""
+  },
+  {
+    "scenario_id": "H03",
+    "split": "heldout",
+    "description": "Parse the delivery date.",
+    "expected_task_outcome": "success",
+    "ground_truth_categories": [
+      "explicit_tool_error"
+    ],
+    "notes": "Recovered error with a corrected input."
+  },
+  {
+    "scenario_id": "H04",
+    "split": "heldout",
+    "description": "Fetch, validate and report data.",
+    "expected_task_outcome": "failure",
+    "ground_truth_categories": [
+      "missing_required_step"
+    ],
+    "notes": ""
+  },
+  {
+    "scenario_id": "H05",
+    "split": "heldout",
+    "description": "Fetch customer records.",
+    "expected_task_outcome": "failure",
+    "ground_truth_categories": [
+      "invalid_action_sequence"
+    ],
+    "notes": ""
+  },
+  {
+    "scenario_id": "H06",
+    "split": "heldout",
+    "description": "Get an insurance quote with premium at most 200.",
+    "expected_task_outcome": "failure",
+    "ground_truth_categories": [
+      "evidence_constraint_contradiction"
+    ],
+    "notes": ""
+  },
+  {
+    "scenario_id": "H07",
+    "split": "heldout",
+    "description": "Find the returns page.",
+    "expected_task_outcome": "failure",
+    "ground_truth_categories": [
+      "repeated_call_no_progress"
+    ],
+    "notes": "Alternating identical calls with unchanged results: a loop, but not consecutive."
+  },
+  {
+    "scenario_id": "H08",
+    "split": "heldout",
+    "description": "Email the invoice to the customer.",
+    "expected_task_outcome": "failure",
+    "ground_truth_categories": [
+      "unsupported_completion_claim"
+    ],
+    "notes": "The failure is in the tool OUTPUT, not in error_details."
+  },
+  {
+    "scenario_id": "H09",
+    "split": "heldout",
+    "description": "Check whether any documents match 'zebra refund'.",
+    "expected_task_outcome": "success",
+    "ground_truth_categories": [],
+    "notes": "No results is a legitimate answer and the empty argument is optional."
+  },
+  {
+    "scenario_id": "H10",
+    "split": "heldout",
+    "description": "Find the shipping policy and summarize it.",
+    "expected_task_outcome": "success",
+    "ground_truth_categories": [],
+    "notes": ""
+  }
+]

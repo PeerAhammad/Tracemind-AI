@@ -1,0 +1,59 @@
+{
+  "baseline_config": {
+    "max_retries": 2,
+    "reformulate_on_empty": false,
+    "require_retrieval_before_summary": false
+  },
+  "candidate_config": {
+    "max_retries": 1,
+    "reformulate_on_empty": true,
+    "require_retrieval_before_summary": true
+  },
+  "rows": [
+    {
+      "task_id": "flaky_search_retry",
+      "outcome_before": "success",
+      "outcome_after": "success",
+      "tool_calls_before": 3,
+      "tool_calls_after": 3,
+      "duration_ms_before": 540.0,
+      "duration_ms_after": 540.0,
+      "findings_before": 1,
+      "findings_after": 1
+    },
+    {
+      "task_id": "refund_empty_search",
+      "outcome_before": "failure",
+      "outcome_after": "success",
+      "tool_calls_before": 4,
+      "tool_calls_after": 3,
+      "duration_ms_before": 660.0,
+      "duration_ms_after": 540.0,
+      "findings_before": 2,
+      "findings_after": 0
+    },
+    {
+      "task_id": "refund_ok",
+      "outcome_before": "success",
+      "outcome_after": "success",
+      "tool_calls_before": 2,
+      "tool_calls_after": 2,
+      "duration_ms_before": 420.0,
+      "duration_ms_after": 420.0,
+      "findings_before": 0,
+      "findings_after": 0
+    }
+  ],
+  "tasks": 3,
+  "completion_rate_before": 0.6666666666666666,
+  "completion_rate_after": 1.0,
+  "tool_calls_before": 9,
+  "tool_calls_after": 8,
+  "duration_ms_before": 1620.0,
+  "duration_ms_after": 1500.0,
+  "tasks_fixed": [
+    "refund_empty_search"
+  ],
+  "tasks_regressed": [],
+  "data_source": "live measurement from deterministic mock-tool runs; durations are simulated"
+}

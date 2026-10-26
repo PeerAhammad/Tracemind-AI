@@ -1,0 +1,55 @@
+{
+  "run_id": "run-2e2ed5b6",
+  "findings": [
+    {
+      "finding_id": "run-2e2ed5b6:repeated_call:e1",
+      "category": "repeated_call_no_progress",
+      "severity": "medium",
+      "evidence_event_ids": [
+        "e1",
+        "e2",
+        "e3"
+      ],
+      "observed_facts": [
+        "Tool 'search_docs' was called 3 times consecutively (steps 1-3) with equivalent input.",
+        "Every call returned an equivalent result.",
+        "Input: {\"query\": \"refund policy\"}"
+      ],
+      "explanation": "Back-to-back calls with the same input produced the same result each time, so the repetition made no measurable progress.",
+      "likely_root_cause": "Hypothesis: the agent has no retry limit and no rule for changing its input after an unchanged result. The trace shows the repetition, not why it happened.",
+      "alternative_explanations": [
+        "The tool may be ignoring part of the input, so changing the input would not help either.",
+        "The call may be an intentional poll; if so, add the tool to the allow-list."
+      ],
+      "recommended_action": "Add a maximum retry limit for this tool and require the agent to change its input or stop after an unchanged result.",
+      "confidence": null,
+      "explanation_source": "rule_based",
+      "verification_status": "detected"
+    },
+    {
+      "finding_id": "run-2e2ed5b6:unsupported_completion:empty_dataflow",
+      "category": "unsupported_completion_claim",
+      "severity": "high",
+      "evidence_event_ids": [
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "observed_facts": [
+        "The run reports completion.",
+        "'search_docs' returned an empty result at step 3.",
+        "'summarize' was then called at step 4 with an empty input value."
+      ],
+      "explanation": "The task was declared complete, but a later step ran on empty data, so its output is not grounded in retrieved evidence.",
+      "likely_root_cause": "Hypothesis: the workflow has no prerequisite requiring a non-empty retrieval before the next step.",
+      "alternative_explanations": [
+        "The empty input may be a legitimate optional argument."
+      ],
+      "recommended_action": "Require a successful, non-empty retrieval before the dependent step, and require evidence before declaring completion.",
+      "confidence": null,
+      "explanation_source": "rule_based",
+      "verification_status": "detected"
+    }
+  ],
+  "detector_errors": []
+}

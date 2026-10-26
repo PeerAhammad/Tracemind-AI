@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: tracemind-api
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: CORS_ORIGINS        # set to your deployed frontend URL, e.g. https://your-app.vercel.app
+        sync: false

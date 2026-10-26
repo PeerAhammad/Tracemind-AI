@@ -1,0 +1,106 @@
+{
+  "scenario_id": "D07",
+  "split": "dev",
+  "description": "Find the refund policy and summarize it.",
+  "notes": "Inputs change each time, so this is not a repeated call; the unsupported claim is the failure.",
+  "expected_task_outcome": "failure",
+  "ground_truth_failures": {
+    "unsupported_completion_claim": [
+      "e5",
+      "e6"
+    ]
+  },
+  "expected_detector_behavior": "Flag unsupported_completion_claim citing ['e5', 'e6'].",
+  "expected_correction": "Require evidence (non-empty retrieval, successful final step) before declaring completion.",
+  "trace": {
+    "run_id": "D07-changing_queries_all_empty",
+    "task_description": "Find the refund policy and summarize it.",
+    "initial_configuration": {},
+    "execution_status": "completed",
+    "events": [
+      {
+        "event_id": "e1",
+        "step_number": 1,
+        "timestamp": "2026-10-12T10:00:01Z",
+        "duration_ms": 100,
+        "event_type": "tool_call",
+        "tool_name": "search_docs",
+        "input": {
+          "query": "refund policy"
+        },
+        "output": {
+          "results": []
+        },
+        "error_details": null
+      },
+      {
+        "event_id": "e2",
+        "step_number": 2,
+        "timestamp": "2026-10-12T10:00:02Z",
+        "duration_ms": 100,
+        "event_type": "tool_call",
+        "tool_name": "search_docs",
+        "input": {
+          "query": "refunds"
+        },
+        "output": {
+          "results": []
+        },
+        "error_details": null
+      },
+      {
+        "event_id": "e3",
+        "step_number": 3,
+        "timestamp": "2026-10-12T10:00:03Z",
+        "duration_ms": 100,
+        "event_type": "tool_call",
+        "tool_name": "search_docs",
+        "input": {
+          "query": "return policy"
+        },
+        "output": {
+          "results": []
+        },
+        "error_details": null
+      },
+      {
+        "event_id": "e4",
+        "step_number": 4,
+        "timestamp": "2026-10-12T10:00:04Z",
+        "duration_ms": 100,
+        "event_type": "tool_call",
+        "tool_name": "search_docs",
+        "input": {
+          "query": "money back"
+        },
+        "output": {
+          "results": []
+        },
+        "error_details": null
+      },
+      {
+        "event_id": "e5",
+        "step_number": 5,
+        "timestamp": "2026-10-12T10:00:05Z",
+        "duration_ms": 100,
+        "event_type": "tool_call",
+        "tool_name": "summarize",
+        "input": {
+          "text": ""
+        },
+        "output": {
+          "summary": "Refunds are available within 30 days."
+        },
+        "error_details": null
+      },
+      {
+        "event_id": "e6",
+        "step_number": 6,
+        "timestamp": "2026-10-12T10:00:06Z",
+        "duration_ms": 0,
+        "event_type": "final_answer",
+        "output": "Task complete: refunds within 30 days."
+      }
+    ]
+  }
+}

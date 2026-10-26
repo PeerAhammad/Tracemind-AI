@@ -1,0 +1,54 @@
+{
+  "scenario_id": "H06",
+  "split": "heldout",
+  "description": "Get an insurance quote with premium at most 200.",
+  "notes": "",
+  "expected_task_outcome": "failure",
+  "ground_truth_failures": {
+    "evidence_constraint_contradiction": [
+      "e1",
+      "e2"
+    ]
+  },
+  "expected_detector_behavior": "Flag evidence_constraint_contradiction citing ['e1', 'e2'].",
+  "expected_correction": "Check tool outputs against task constraints before declaring completion.",
+  "trace": {
+    "run_id": "H06-premium_over_budget",
+    "task_description": "Get an insurance quote with premium at most 200.",
+    "initial_configuration": {
+      "constraints": [
+        {
+          "tool": "get_quote",
+          "field": "premium",
+          "max": 200
+        }
+      ]
+    },
+    "execution_status": "completed",
+    "events": [
+      {
+        "event_id": "e1",
+        "step_number": 1,
+        "timestamp": "2026-10-12T10:00:01Z",
+        "duration_ms": 100,
+        "event_type": "tool_call",
+        "tool_name": "get_quote",
+        "input": {
+          "plan": "basic"
+        },
+        "output": {
+          "premium": 260
+        },
+        "error_details": null
+      },
+      {
+        "event_id": "e2",
+        "step_number": 2,
+        "timestamp": "2026-10-12T10:00:02Z",
+        "duration_ms": 0,
+        "event_type": "final_answer",
+        "output": "Quote obtained within budget. Done."
+      }
+    ]
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "run_id": "run-2e2ed5b6",
+  "task_id": "refund_empty_search",
+  "task_description": "Find the refund policy in the docs and summarize it.",
+  "configuration": {
+    "max_retries": 2,
+    "reformulate_on_empty": false,
+    "require_retrieval_before_summary": false
+  },
+  "parent_run_id": null,
+  "events": [
+    {
+      "event_id": "e1",
+      "step_number": 1,
+      "event_type": "tool_call",
+      "tool_name": "search_docs",
+      "input": {
+        "query": "refund policy"
+      },
+      "output": {
+        "results": []
+      },
+      "timestamp": "2026-01-01T00:00:00Z",
+      "duration_ms": 120.0,
+      "error_details": null
+    },
+    {
+      "event_id": "e2",
+      "step_number": 2,
+      "event_type": "tool_call",
+      "tool_name": "search_docs",
+      "input": {
+        "query": "refund policy"
+      },
+      "output": {
+        "results": []
+      },
+      "timestamp": "2026-01-01T00:00:00.120000Z",
+      "duration_ms": 120.0,
+      "error_details": null
+    },
+    {
+      "event_id": "e3",
+      "step_number": 3,
+      "event_type": "tool_call",
+      "tool_name": "search_docs",
+      "input": {
+        "query": "refund policy"
+      },
+      "output": {
+        "results": []
+      },
+      "timestamp": "2026-01-01T00:00:00.240000Z",
+      "duration_ms": 120.0,
+      "error_details": null
+    },
+    {
+      "event_id": "e4",
+      "step_number": 4,
+      "event_type": "tool_call",
+      "tool_name": "summarize",
+      "input": {
+        "text": ""
+      },
+      "output": {
+        "summary": "Refunds are available within 30 days."
+      },
+      "timestamp": "2026-01-01T00:00:00.360000Z",
+      "duration_ms": 300.0,
+      "error_details": null
+    },
+    {
+      "event_id": "e5",
+      "step_number": 5,
+      "event_type": "final_answer",
+      "tool_name": null,
+      "input": {},
+      "output": "Task complete: Refunds are available within 30 days.",
+      "timestamp": "2026-01-01T00:00:00.660000Z",
+      "duration_ms": 0.0,
+      "error_details": null
+    }
+  ],
+  "agent_reported_status": "completed",
+  "task_outcome": "failure",
+  "duration_ms": 660.0,
+  "tool_call_count": 4,
+  "token_usage": null,
+  "created_at": "2026-10-24T10:58:55.636241Z"
+}

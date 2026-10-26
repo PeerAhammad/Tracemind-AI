@@ -1,0 +1,128 @@
+{
+  "scenario_id": "H07",
+  "split": "heldout",
+  "description": "Find the returns page.",
+  "notes": "Alternating identical calls with unchanged results: a loop, but not consecutive.",
+  "expected_task_outcome": "failure",
+  "ground_truth_failures": {
+    "repeated_call_no_progress": [
+      "e1",
+      "e2",
+      "e3",
+      "e4",
+      "e5",
+      "e6"
+    ]
+  },
+  "expected_detector_behavior": "Flag repeated_call_no_progress citing ['e1', 'e2', 'e3', 'e4', 'e5', 'e6'].",
+  "expected_correction": "Cap retries and change the input (or stop) after an unchanged result.",
+  "trace": {
+    "run_id": "H07-alternating_loop",
+    "task_description": "Find the returns page.",
+    "initial_configuration": {},
+    "execution_status": "failed",
+    "events": [
+      {
+        "event_id": "e1",
+        "step_number": 1,
+        "timestamp": "2026-10-12T10:00:01Z",
+        "duration_ms": 100,
+        "event_type": "tool_call",
+        "tool_name": "search_docs",
+        "input": {
+          "query": "returns page"
+        },
+        "output": {
+          "count": 0,
+          "note": "no match"
+        },
+        "error_details": null
+      },
+      {
+        "event_id": "e2",
+        "step_number": 2,
+        "timestamp": "2026-10-12T10:00:02Z",
+        "duration_ms": 100,
+        "event_type": "tool_call",
+        "tool_name": "fetch_page",
+        "input": {
+          "url": "https://example.test/returns"
+        },
+        "output": {
+          "status": 404
+        },
+        "error_details": null
+      },
+      {
+        "event_id": "e3",
+        "step_number": 3,
+        "timestamp": "2026-10-12T10:00:03Z",
+        "duration_ms": 100,
+        "event_type": "tool_call",
+        "tool_name": "search_docs",
+        "input": {
+          "query": "returns page"
+        },
+        "output": {
+          "count": 0,
+          "note": "no match"
+        },
+        "error_details": null
+      },
+      {
+        "event_id": "e4",
+        "step_number": 4,
+        "timestamp": "2026-10-12T10:00:04Z",
+        "duration_ms": 100,
+        "event_type": "tool_call",
+        "tool_name": "fetch_page",
+        "input": {
+          "url": "https://example.test/returns"
+        },
+        "output": {
+          "status": 404
+        },
+        "error_details": null
+      },
+      {
+        "event_id": "e5",
+        "step_number": 5,
+        "timestamp": "2026-10-12T10:00:05Z",
+        "duration_ms": 100,
+        "event_type": "tool_call",
+        "tool_name": "search_docs",
+        "input": {
+          "query": "returns page"
+        },
+        "output": {
+          "count": 0,
+          "note": "no match"
+        },
+        "error_details": null
+      },
+      {
+        "event_id": "e6",
+        "step_number": 6,
+        "timestamp": "2026-10-12T10:00:06Z",
+        "duration_ms": 100,
+        "event_type": "tool_call",
+        "tool_name": "fetch_page",
+        "input": {
+          "url": "https://example.test/returns"
+        },
+        "output": {
+          "status": 404
+        },
+        "error_details": null
+      },
+      {
+        "event_id": "e7",
+        "step_number": 7,
+        "timestamp": "2026-10-12T10:00:07Z",
+        "duration_ms": 0,
+        "event_type": "final_answer",
+        "output": "Task failed: could not find the returns page."
+      }
+    ]
+  }
+}
