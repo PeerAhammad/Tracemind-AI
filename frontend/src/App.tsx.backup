@@ -1,0 +1,405 @@
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  Activity, AlertCircle, ArrowDownRight, ArrowRight, ArrowUpRight,
+  BarChart3, Check, CheckCircle2, ChevronDown, ChevronRight, CircleDot,
+  Clock3, Code2, Database, FileSearch, FlaskConical, GitCompareArrows,
+  LayoutDashboard, LoaderCircle, Menu, Play, RefreshCw, Search, Settings2,
+  Shield, ShieldAlert, ShieldCheck, Sparkles, Upload, Workflow, X,
+} from "lucide-react";
+import {
+  api, type Analysis, type Corrections, type Finding, type Run,
+  type Scenario, type Task, type Trace,
+} from "./lib/api";
+import "./style.css";
+
+type Page = "Overview" | "Trace Explorer" | "Analysis" | "Corrections" | "Replay Comparison" | "Benchmarks" | "Settings";
+
+const navigation: { name: Page; icon: typeof LayoutDashboard }[] = [
+  { name: "Overview", icon: LayoutDashboard },
+  { name: "Trace Explorer", icon: FileSearch },
+  { name: "Analysis", icon: ShieldAlert },
+  { name: "Corrections", icon: Workflow },
+  { name: "Replay Comparison", icon: GitCompareArrows },
+  { name: "Benchmarks", icon: BarChart3 },
+  { name: "Settings", icon: Settings2 },
+];
+
+function fmt(value: unknown, suffix = ""): string {
+  return value === null || value === undefined || !Number.isFinite(Number(value))
+    ? "n/a"
+    : `${value}${suffix}`;
+}
+function pct(value: unknown): string {
+  return value === null || value === undefined || !Number.isFinite(Number(value))
+    ? "n/a"
+    : `${(Number(value) * 100).toFixed(1)}%`;
+}
+function human(value: string): string {
+  return value.replaceAll("_", " ");
+}
+function shortId(value: string): string {
+  return value.length > 22 ? `${value.slice(0, 19)}…` : value;
+}
+function StatusPill({ children, tone = "neutral" }: { children: React.ReactNode; tone?: string }) {
+  return <span className={`pill pill-${tone}`}>{children}</span>;
+}
+function Metric({ label, value, detail, icon: Icon, tone = "blue" }: {
+  label: string; value: string; detail: string; icon: typeof Activity; tone?: string;
+}) {
+  return <article className="metric card">
+    <div className={`metric-icon icon-${tone}`}><Icon size={18} /></div>
+    <div className="metric-label">{label}</div>
+    <div className="metric-value">{value}</div>
+    <div className="metric-detail">{detail}</div>
+  </article>;
+}
+function Empty({ title, body }: { title: string; body: string }) {
+  return <div className="empty-state"><div className="empty-icon"><Database size={22} /></div><h3>{title}</h3><p>{body}</p></div>;
+}
+function PanelTitle({ eyebrow, title, action }: { eyebrow?: string; title: string; action?: React.ReactNode }) {
+  return <div className="panel-title"><div>{eyebrow && <div className="eyebrow">{eyebrow}</div>}<h2>{title}</h2></div>{action}</div>;
+}
+
+export default function App() {
+  const [page, setPage] = useState<Page>("Overview");
+  const [health, setHealth] = useState<"checking" | "online" | "offline">("checking");
+  const [scenarios, setScenarios] = useState<Scenario[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [benchmark, setBenchmark] = useState<any>(null);
+  const [savedBenchmark, setSavedBenchmark] = useState<any>(null);
+  const [run, setRun] = useState<Run | null>(null);
+  const [trace, setTrace] = useState<Trace | null>(null);
+  const [analysis, setAnalysis] = useState<Analysis | null>(null);
+  const [corrections, setCorrections] = useState<Corrections | null>(null);
+  const [selectedCorrections, setSelectedCorrections] = useState<string[]>([]);
+  const [comparison, setComparison] = useState<any>(null);
+  const [busy, setBusy] = useState("");
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [query, setQuery] = useState("");
+  const [scenarioFilter, setScenarioFilter] = useState("all");
+  const [selectedFinding, setSelectedFinding] = useState<string | null>(null);
+  const [mobileNav, setMobileNav] = useState(false);
+  const [wakeMessage, setWakeMessage] = useState(false);
+
+  const refreshOverview = useCallback(async () => {
+    setError("");
+    setHealth("checking");
+    const wakeTimer = window.setTimeout(() => setWakeMessage(true), 3000);
+    try {
+      const [h, b, s, t] = await Promise.all([
+        api.health(), api.benchmark(), api.scenarios(), api.tasks(),
+      ]);
+      setHealth(h.status === "ok" ? "online" : "offline");
+      setBenchmark(b);
+      setScenarios(s);
+      setTasks(t);
+    } catch (e) {
+      setHealth("offline");
+      setError(e instanceof Error ? e.message : "Could not connect to the backend.");
+    } finally {
+      clearTimeout(wakeTimer);
+      setWakeMessage(false);
+    }
+    try { setSavedBenchmark(await api.savedBenchmark()); } catch { setSavedBenchmark(null); }
+  }, []);
+
+  useEffect(() => { void refreshOverview(); }, [refreshOverview]);
+
+  const action = async <T,>(label: string, fn: () => Promise<T>, onSuccess: (result: T) => void) => {
+    setBusy(label);
+    setError("");
+    setNotice("");
+    try {
+      const result = await fn();
+      onSuccess(result);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "The request failed.");
+    } finally {
+      setBusy("");
+    }
+  };
+
+  const openTrace = async (id: string, mode: "trace" | "run" = "trace") => {
+    setBusy("Opening trace");
+    setError("");
+    setNotice("");
+    try {
+      const data = await api.trace(id);
+      setTrace(data);
+      setAnalysis(null);
+      setCorrections(null);
+      setComparison(null);
+      if (mode === "run") {
+        try { setRun(await api.runTask("__never__")); } catch { /* Do not create an unintended run. */ }
+        setRun({ run_id: id, task_id: "", task_outcome: "unknown", agent_reported_status: "unknown" });
+      } else {
+        setRun(null);
+      }
+      setPage("Trace Explorer");
+      setNotice(`Loaded trace ${id} with ${data.events?.length ?? 0} events.`);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not load trace.");
+    } finally { setBusy(""); }
+  };
+
+  const loadScenario = async (id: string) => {
+    setBusy(`Loading ${id}`);
+    setError(""); setNotice("");
+    try {
+      const loaded = await api.loadScenario(id);
+      setTrace(await api.trace(loaded.id));
+      setRun(null); setAnalysis(null); setCorrections(null); setComparison(null);
+      setSelectedFinding(null);
+      setPage("Trace Explorer");
+      setNotice(`Scenario ${id} loaded as trace ${loaded.id} (${loaded.event_count} events).`);
+    } catch (e) { setError(e instanceof Error ? e.message : "Could not load scenario."); }
+    finally { setBusy(""); }
+  };
+
+  const startTask = async (taskId: string) => {
+    setBusy(`Running ${taskId}`); setError(""); setNotice("");
+    try {
+      const r = await api.runTask(taskId);
+      setRun(r);
+      setTrace(await api.trace(r.run_id));
+      setAnalysis(null); setCorrections(null); setComparison(null);
+      setPage("Trace Explorer");
+      setNotice(`Created run ${r.run_id}.`);
+    } catch (e) { setError(e instanceof Error ? e.message : "Task run failed."); }
+    finally { setBusy(""); }
+  };
+
+  const analyze = async () => {
+    if (!trace) return;
+    setBusy("Analyzing trace"); setError(""); setNotice("");
+    try {
+      const result = run
+        ? await api.analyzeRun(trace.run_id)
+        : await api.analyzeTrace(trace.run_id);
+      setAnalysis(result);
+      setSelectedFinding(result.findings[0]?.finding_id ?? null);
+      setPage("Analysis");
+      setNotice(`Analysis complete: ${result.findings.length} finding(s).`);
+    } catch (e) { setError(e instanceof Error ? e.message : "Analysis failed."); }
+    finally { setBusy(""); }
+  };
+
+  const getCorrections = async () => {
+    if (!run) {
+      setError("Corrections and replay require a task run. Select a task and create a run first.");
+      setPage("Trace Explorer");
+      return;
+    }
+    setBusy("Generating corrections"); setError(""); setNotice("");
+    try {
+      const result = await api.corrections(run.run_id);
+      setCorrections(result);
+      setSelectedCorrections(result.corrections.map(c => c.correction_id));
+      setAnalysis(await api.analyzeRun(run.run_id));
+      setPage("Corrections");
+    } catch (e) { setError(e instanceof Error ? e.message : "Could not load corrections."); }
+    finally { setBusy(""); }
+  };
+
+  const replay = async () => {
+    if (!run || !corrections) return;
+    const chosen = corrections.corrections.filter(c => selectedCorrections.includes(c.correction_id));
+    const changes = Object.assign({}, ...chosen.map(c => c.config_changes));
+    if (!chosen.length || !Object.keys(changes).length) {
+      setError("Select at least one correction before replay.");
+      return;
+    }
+    if (!window.confirm(`Approve ${chosen.length} correction(s) and replay this task with these changes?\n\n${JSON.stringify(changes, null, 2)}`)) return;
+    setBusy("Replaying with approved corrections"); setError(""); setNotice("");
+    try {
+      const replayed = await api.replay(run.run_id, changes);
+      setComparison(await api.comparison(replayed.run_id));
+      setRun(replayed);
+      setTrace(await api.trace(replayed.run_id));
+      setPage("Replay Comparison");
+      setNotice("Replay completed. Verification reflects the backend comparison response.");
+    } catch (e) { setError(e instanceof Error ? e.message : "Replay failed."); }
+    finally { setBusy(""); }
+  };
+
+  const upload = async (file?: File) => {
+    if (!file) return;
+    setBusy("Uploading trace"); setError(""); setNotice("");
+    try {
+      const result = await api.uploadTrace(file);
+      setTrace(await api.trace(result.id));
+      setRun(null); setAnalysis(null); setCorrections(null); setComparison(null);
+      setPage("Trace Explorer");
+      setNotice(`Uploaded ${file.name}; ${result.event_count} events parsed.`);
+    } catch (e) { setError(e instanceof Error ? e.message : "Trace upload failed."); }
+    finally { setBusy(""); }
+  };
+
+  const visibleScenarios = useMemo(() => scenarios.filter(s => {
+    const q = query.toLowerCase();
+    return (!q || `${s.scenario_id} ${s.description} ${s.notes}`.toLowerCase().includes(q))
+      && (scenarioFilter === "all" || s.split.toLowerCase() === scenarioFilter);
+  }), [scenarios, query, scenarioFilter]);
+
+  const currentFinding = analysis?.findings.find(f => f.finding_id === selectedFinding) ?? analysis?.findings[0];
+  const evidenceIds = new Set(currentFinding?.evidence_event_ids ?? []);
+  const overall = benchmark?.overall ?? benchmark;
+  const heldOut = benchmark?.held_out ?? benchmark?.test ?? null;
+  const dev = benchmark?.dev ?? null;
+  const misses = (benchmark?.scenario_results ?? []).filter((s: any) =>
+    (s.false_positives?.length ?? 0) > 0 || (s.false_negatives?.length ?? 0) > 0);
+
+  const pageTitle: Record<Page, string> = {
+    "Overview": "Overview",
+    "Trace Explorer": "Trace Explorer",
+    "Analysis": "Trace Analysis",
+    "Corrections": "Corrective Actions",
+    "Replay Comparison": "Replay Comparison",
+    "Benchmarks": "Benchmark Lab",
+    "Settings": "Settings",
+  };
+
+  return <div className="app-shell">
+    <aside className={`sidebar ${mobileNav ? "sidebar-open" : ""}`}>
+      <div className="brand">
+        <div className="brand-mark"><Shield size={21} strokeWidth={2.2} /></div>
+        <div><div className="brand-name">TraceMind<span> AI</span></div><div className="brand-caption">AGENT RELIABILITY</div></div>
+        <button className="mobile-close icon-button" onClick={() => setMobileNav(false)} aria-label="Close navigation"><X size={18} /></button>
+      </div>
+      <div className="workspace-label">WORKSPACE</div>
+      <div className="workspace-card"><div className="workspace-avatar">T</div><div className="workspace-copy"><strong>TraceMind Lab</strong><span>Local environment</span></div><ChevronDown size={15} className="muted" /></div>
+      <div className="nav-label">PLATFORM</div>
+      <nav>{navigation.map(item => {
+        const Icon = item.icon;
+        return <button key={item.name} className={`nav-item ${page === item.name ? "nav-active" : ""}`} onClick={() => { setPage(item.name); setMobileNav(false); }}>
+          <Icon size={17} strokeWidth={1.8} /><span>{item.name}</span>
+          {item.name === "Analysis" && analysis && <span className="nav-count">{analysis.findings.length}</span>}
+          {item.name === "Corrections" && corrections && <span className="nav-count">{corrections.corrections.length}</span>}
+        </button>;
+      })}</nav>
+      <div className="sidebar-spacer" />
+      <div className="sidebar-status"><div className="status-heading"><span className={`status-dot ${health === "online" ? "dot-green" : health === "offline" ? "dot-red" : "dot-amber"}`} />API connection <span className="status-right">{health}</span></div><div className="sidebar-status-sub">{health === "online" ? "Backend responding" : health === "offline" ? "Connection unavailable" : "Checking endpoint…"}</div><button className="text-button status-refresh" onClick={() => void refreshOverview()}><RefreshCw size={12} /> Refresh status</button></div>
+      <div className="profile-row"><div className="profile-avatar">TM</div><div><strong>TraceMind AI</strong><span>Research prototype</span></div><span className="profile-menu">•••</span></div>
+    </aside>
+
+    {mobileNav && <button className="mobile-overlay" onClick={() => setMobileNav(false)} aria-label="Close menu" />}
+    <main className="main-area">
+      <header className="topbar">
+        <div className="topbar-left"><button className="mobile-menu icon-button" onClick={() => setMobileNav(true)} aria-label="Open navigation"><Menu size={19} /></button><div className="breadcrumbs">Workspace <ChevronRight size={13} /> <span>{pageTitle[page]}</span></div></div>
+        <div className="topbar-right"><div className="topbar-status"><span className={`status-dot ${health === "online" ? "dot-green" : health === "offline" ? "dot-red" : "dot-amber"}`} />{health === "online" ? "System operational" : health === "offline" ? "API unavailable" : "Connecting"}</div><button className="icon-button" title="Refresh data" onClick={() => void refreshOverview()}><RefreshCw size={16} /></button><div className="topbar-avatar">TM</div></div>
+      </header>
+
+      <div className="page-content">
+        {(error || notice || busy || wakeMessage) && <div className={`toast ${error ? "toast-error" : notice ? "toast-success" : "toast-progress"}`}>
+          {error ? <AlertCircle size={16} /> : busy || wakeMessage ? <LoaderCircle className="spin" size={16} /> : <CheckCircle2 size={16} />}
+          <span>{error || notice || (wakeMessage ? "Waking up the backend can take about a minute on a free host…" : busy)}</span>
+          {error && <button className="toast-dismiss" onClick={() => setError("")}><X size={15} /></button>}
+          {notice && <button className="toast-dismiss" onClick={() => setNotice("")}><X size={15} /></button>}
+        </div>}
+
+        {page === "Overview" && <section className="page-section">
+          <div className="page-heading"><div><div className="eyebrow"><span className="live-dot" /> SYSTEM OVERVIEW</div><h1>Agent reliability, <span className="heading-accent">at a glance.</span></h1><p>Inspect execution traces, diagnose failures, and validate corrective actions.</p></div><div className="heading-actions"><button className="btn btn-secondary" onClick={() => setPage("Benchmarks")}><BarChart3 size={15} /> View benchmarks</button><button className="btn btn-primary" onClick={() => setPage("Trace Explorer")}><Play size={15} /> Start investigation <ArrowRight size={15} /></button></div></div>
+          <div className="status-banner"><div className={`banner-icon ${health === "online" ? "banner-good" : "banner-warn"}`}>{health === "online" ? <ShieldCheck size={19} /> : <Activity size={19} />}</div><div className="banner-copy"><strong>{health === "online" ? "Monitoring services are connected" : health === "offline" ? "Backend connection unavailable" : "Connecting to monitoring services"}</strong><span>{health === "online" ? "FastAPI is reachable. Metrics below come from the live benchmark endpoint." : "Check that the FastAPI server is running on port 8000."}</span></div><StatusPill tone={health === "online" ? "green" : "amber"}>{health}</StatusPill></div>
+          <div className="section-label-row"><span>BENCHMARK SNAPSHOT</span><span className="snapshot-source">{benchmark ? "LIVE RESPONSE · /api/benchmark" : "AWAITING DATA"}</span></div>
+          <div className="metric-grid">
+            <Metric label="Labelled scenarios" value={fmt(benchmark?.total_cases ?? benchmark?.overall?.scenarios)} detail={`${fmt(dev?.scenarios)} dev · ${fmt(heldOut?.scenarios)} held-out`} icon={Database} tone="blue" />
+            <Metric label="Overall precision" value={pct(overall?.precision)} detail="Across reported benchmark cases" icon={TargetIcon} tone="purple" />
+            <Metric label="Overall recall" value={pct(overall?.recall)} detail="Misses matter as much as hits" icon={Activity} tone="green" />
+            <Metric label="Evidence hit rate" value={pct(overall?.evidence_hit_rate)} detail="Evidence IDs matched findings" icon={ShieldCheck} tone="amber" />
+          </div>
+          <div className="overview-grid">
+            <article className="card scenarios-card"><PanelTitle eyebrow="INVESTIGATION" title="Start with a scenario" action={<button className="text-button" onClick={() => setPage("Trace Explorer")}>All scenarios <ArrowRight size={13} /></button>} /><p className="panel-description">Load a labelled example trace or execute a controlled task to explore the full diagnosis workflow.</p>
+              {scenarios.slice(0, 4).map(s => <div className="scenario-row" key={s.scenario_id}><div className="scenario-icon"><FileSearch size={16} /></div><div className="scenario-copy"><strong>{s.scenario_id} <span className="scenario-desc">{s.description}</span></strong><span>{human(s.split)} · expected {s.expected_task_outcome}</span></div><button className="mini-button" disabled={!!busy} onClick={() => void loadScenario(s.scenario_id)}>Load <ArrowRight size={13} /></button></div>)}
+              {!scenarios.length && <Empty title="No scenarios loaded" body="Connect to the backend to fetch the labelled scenario set." />}
+            </article>
+            <article className="card quick-card"><PanelTitle eyebrow="QUICK ACTIONS" title="Investigation tools" /><p className="panel-description">Jump into the next step of your workflow.</p>
+              <button className="quick-action" onClick={() => setPage("Trace Explorer")}><span className="quick-icon quick-blue"><FileSearch size={17} /></span><span><strong>Explore traces</strong><small>Load examples or upload JSON</small></span><ChevronRight size={16} /></button>
+              <button className="quick-action" onClick={() => setPage("Analysis")}><span className="quick-icon quick-violet"><ShieldAlert size={17} /></span><span><strong>Review findings</strong><small>{analysis ? `${analysis.findings.length} finding(s) in current trace` : "Inspect evidence and hypotheses"}</small></span><ChevronRight size={16} /></button>
+              <button className="quick-action" onClick={() => setPage("Benchmarks")}><span className="quick-icon quick-green"><FlaskConical size={17} /></span><span><strong>Evaluate detector</strong><small>Metrics, splits, and known misses</small></span><ChevronRight size={16} /></button>
+              <div className="honesty-note"><Sparkles size={15} /><span>Rule-based analysis. No LLM integration is enabled.</span></div>
+            </article>
+          </div>
+          <div className="footer-note"><span><CircleDot size={12} /> RESEARCH PROTOTYPE</span><span>Runner is deterministic and simulated · Durations are simulated</span></div>
+        </section>}
+
+        {page === "Trace Explorer" && <section className="page-section">
+          <div className="page-heading compact-heading"><div><div className="eyebrow">INVESTIGATION WORKSPACE</div><h1>Trace <span className="heading-accent">Explorer</span></h1><p>Load a labelled scenario, run a controlled task, or upload a trace JSON file.</p></div><label className="btn btn-secondary upload-button"><Upload size={15} /> Upload JSON<input type="file" accept=".json,application/json" onChange={e => { void upload(e.target.files?.[0]); e.currentTarget.value = ""; }} /></label></div>
+          <div className="explorer-grid">
+            <article className="card"><PanelTitle eyebrow="LABELLED EXAMPLES" title="Scenario library" action={<StatusPill>{scenarios.length} scenarios</StatusPill>} /><div className="search-box"><Search size={15} /><input placeholder="Search by ID or description…" value={query} onChange={e => setQuery(e.target.value)} /><select value={scenarioFilter} onChange={e => setScenarioFilter(e.target.value)}><option value="all">All splits</option><option value="dev">Dev</option><option value="held_out">Held out</option><option value="test">Test</option></select></div>
+              <div className="scenario-list">{visibleScenarios.map(s => <div className="scenario-list-row" key={s.scenario_id}><div className="scenario-icon"><FileSearch size={16} /></div><div className="scenario-list-copy"><strong>{s.scenario_id}</strong><p>{s.description}</p><div className="tag-row"><StatusPill tone={s.split.toLowerCase().includes("held") || s.split.toLowerCase() === "test" ? "purple" : "neutral"}>{s.split}</StatusPill><StatusPill tone={s.expected_task_outcome === "success" ? "green" : "amber"}>Expected {s.expected_task_outcome}</StatusPill></div></div><button className="mini-button" disabled={!!busy} onClick={() => void loadScenario(s.scenario_id)}>Load</button></div>)}
+              {!visibleScenarios.length && <Empty title="No matching scenarios" body="Try a different search or split filter." />}
+            </div></article>
+            <article className="card"><PanelTitle eyebrow="CONTROLLED RUNNER" title="Run a task" /><p className="panel-description">Execute the deterministic simulated agent and create a run that supports correction proposals and replay.</p><div className="task-list">{tasks.map(t => <div className="task-row" key={t.task_id}><div className="task-icon"><Workflow size={15} /></div><div className="task-copy"><strong>{human(t.task_id)}</strong><p>{t.description}</p></div><button className="mini-button" disabled={!!busy} onClick={() => void startTask(t.task_id)}><Play size={12} /> Run</button></div>)}{!tasks.length && <Empty title="No tasks available" body="The task list will appear when the backend is reachable." />}</div><div className="divider" /><div className="info-note"><AlertCircle size={15} /><span>Uploaded traces can be analyzed. Corrective actions and replay require a run created by the controlled task runner.</span></div></article>
+          </div>
+          {trace && <article className="card trace-detail-card"><PanelTitle eyebrow="ACTIVE TRACE" title={trace.run_id} action={<div className="button-row"><StatusPill tone={run ? "purple" : "neutral"}>{run ? "Controlled run" : "Trace"}</StatusPill><button className="btn btn-primary btn-sm" disabled={!!busy} onClick={() => void analyze()}><ShieldAlert size={14} /> Analyze trace</button></div>} /><div className="trace-meta-grid"><div><span>Trace ID</span><strong>{trace.run_id}</strong></div><div><span>Events</span><strong>{trace.events?.length ?? 0}</strong></div><div><span>Source</span><strong>{run ? "Task runner" : "Loaded / uploaded trace"}</strong></div><div><span>Outcome</span><strong>{run ? human(run.task_outcome) : "Not applicable"}</strong></div></div><div className="timeline"><div className="timeline-line" />{(trace.events ?? []).map((event, i) => <div className="timeline-item" key={`${event.event_id}-${i}`}><div className="timeline-node"><span /></div><div className="timeline-event"><div className="timeline-event-head"><strong>{event.event_id}</strong><StatusPill>{human(event.event_type ?? "event")}</StatusPill><span className="timeline-index">STEP {i + 1}</span></div><pre>{JSON.stringify(event, null, 2)}</pre></div></div>)}{!trace.events?.length && <Empty title="Trace contains no events" body="Load a different scenario or inspect the uploaded JSON." />}</div></article>}
+        </section>}
+
+        {page === "Analysis" && <section className="page-section">
+          <div className="page-heading compact-heading"><div><div className="eyebrow">RULE-BASED DIAGNOSTICS</div><h1>Trace <span className="heading-accent">Analysis</span></h1><p>Findings are linked to observed event evidence; root causes are hypotheses, not established facts.</p></div><div className="heading-actions"><button className="btn btn-secondary" disabled={!trace || !!busy} onClick={() => void analyze()}><RefreshCw size={14} /> Analyze again</button><button className="btn btn-primary" disabled={!trace || !!busy} onClick={() => void getCorrections()}>Review corrections <ArrowRight size={14} /></button></div></div>
+          {!analysis ? <article className="card"><Empty title="No analysis available" body="Load a trace in Trace Explorer, then select Analyze trace to retrieve findings from the backend." /><div className="center-action"><button className="btn btn-primary" onClick={() => setPage("Trace Explorer")}>Open Trace Explorer <ArrowRight size={14} /></button></div></article> : <>
+            <div className="analysis-summary"><div className="summary-icon"><ShieldAlert size={19} /></div><div><strong>{analysis.findings.length} finding(s) identified</strong><span>Trace {analysis.run_id} · source: rule_based</span></div><div className="summary-counts"><span className="severity-high">{analysis.findings.filter(f => f.severity === "high").length} high</span><span className="severity-medium">{analysis.findings.filter(f => f.severity === "medium").length} medium</span><span className="severity-low">{analysis.findings.filter(f => f.severity === "low").length} low</span></div></div>
+            <div className="analysis-layout"><article className="card finding-list-card"><PanelTitle eyebrow="DETECTIONS" title="Findings" /><div className="finding-list">{analysis.findings.map(f => <button key={f.finding_id} className={`finding-list-item ${currentFinding?.finding_id === f.finding_id ? "finding-selected" : ""}`} onClick={() => setSelectedFinding(f.finding_id)}><div className={`severity-mark severity-${f.severity}`} /><div className="finding-list-copy"><strong>{human(f.category)}</strong><span>{f.evidence_event_ids.length} evidence events</span><StatusPill tone={f.severity === "high" ? "red" : f.severity === "medium" ? "amber" : "green"}>{f.severity}</StatusPill></div><ChevronRight size={15} /></button>)}{!analysis.findings.length && <Empty title="No findings detected" body="The detector returned no findings for this trace. This does not prove the trace is error-free." />}</div>{analysis.detector_errors?.length > 0 && <div className="warning-note"><AlertCircle size={15} /> Detector errors: {analysis.detector_errors.length}</div>}</article>
+              {currentFinding && <article className="card finding-detail-card"><div className="finding-detail-head"><div><div className="eyebrow">FINDING DETAIL</div><h2>{human(currentFinding.category)}</h2></div><StatusPill tone={currentFinding.severity === "high" ? "red" : currentFinding.severity === "medium" ? "amber" : "green"}>{currentFinding.severity} severity</StatusPill></div><div className="finding-id">{currentFinding.finding_id}</div>
+                <div className="detail-block"><div className="detail-block-title"><span className="detail-symbol observed-symbol"><Check size={13} /></span>Observed in trace</div><ul className="fact-list">{currentFinding.observed_facts.map((fact, i) => <li key={i}>{fact}</li>)}</ul></div>
+                <div className="detail-block hypothesis-block"><div className="detail-block-title"><span className="detail-symbol hypothesis-symbol"><Sparkles size={13} /></span>Hypothesis</div><p>{currentFinding.likely_root_cause}</p><p className="muted-copy">{currentFinding.explanation}</p></div>
+                {currentFinding.alternative_explanations.length > 0 && <div className="detail-block"><div className="detail-block-title">Alternative explanations</div><ul className="fact-list alternative-list">{currentFinding.alternative_explanations.map((x, i) => <li key={i}>{x}</li>)}</ul></div>}
+                <div className="recommended-action"><div className="detail-block-title"><ArrowUpRight size={14} /> Recommended action</div><p>{currentFinding.recommended_action}</p></div>
+                <div className="finding-footer"><span>Explanation source <strong>{currentFinding.explanation_source}</strong></span><span>Verification <StatusPill tone={currentFinding.verification_status === "fix_verified" ? "green" : "neutral"}>{human(currentFinding.verification_status)}</StatusPill></span></div>
+              </article>}
+            </div>
+            {trace && <article className="card evidence-card"><PanelTitle eyebrow="EVENT-LEVEL EVIDENCE" title="Trace timeline" action={<span className="evidence-legend"><i /> Highlighted evidence</span>} /><div className="timeline evidence-timeline"><div className="timeline-line" />{(trace.events ?? []).map((event, i) => { const highlighted = evidenceIds.has(event.event_id); return <div className={`timeline-item ${highlighted ? "evidence-highlight" : ""}`} key={`${event.event_id}-${i}`}><div className="timeline-node"><span /></div><div className="timeline-event"><div className="timeline-event-head"><strong>{event.event_id}</strong><StatusPill>{human(event.event_type ?? "event")}</StatusPill>{highlighted && <StatusPill tone="amber">Evidence</StatusPill>}<span className="timeline-index">STEP {i + 1}</span></div><pre>{JSON.stringify(event, null, 2)}</pre></div></div>; })}</div></article>}
+          </>}
+        </section>}
+
+        {page === "Corrections" && <section className="page-section">
+          <div className="page-heading compact-heading"><div><div className="eyebrow">HUMAN-IN-THE-LOOP CONTROL</div><h1>Corrective <span className="heading-accent">Actions</span></h1><p>Review each proposed configuration change. Nothing is replayed until you explicitly approve.</p></div><StatusPill tone="amber"><Shield size={13} /> Approval required</StatusPill></div>
+          {!corrections ? <article className="card"><Empty title="No correction proposals loaded" body="Create a controlled task run, then choose Review corrections to request proposals from the backend." /><div className="center-action"><button className="btn btn-primary" onClick={() => setPage("Trace Explorer")}>Open Trace Explorer</button></div></article> : <>
+            <div className="approval-banner"><div className="approval-icon"><Shield size={19} /></div><div><strong>Review before execution</strong><p>Choose the proposals you approve. The selected configuration changes will be sent only after you confirm replay.</p></div></div>
+            <div className="correction-layout"><article className="card"><PanelTitle eyebrow="PROPOSED CHANGES" title={`${corrections.corrections.length} correction(s)`} action={<button className="text-button" onClick={() => setSelectedCorrections(selectedCorrections.length === corrections.corrections.length ? [] : corrections.corrections.map(c => c.correction_id))}>{selectedCorrections.length === corrections.corrections.length ? "Deselect all" : "Select all"}</button>} />
+              <div className="correction-list">{corrections.corrections.map(c => { const selected = selectedCorrections.includes(c.correction_id); return <label key={c.correction_id} className={`correction-item ${selected ? "correction-checked" : ""}`}><input type="checkbox" checked={selected} onChange={e => setSelectedCorrections(old => e.target.checked ? [...old, c.correction_id] : old.filter(id => id !== c.correction_id))} /><span className="correction-check"><Check size={13} /></span><span className="correction-body"><strong>{c.title}</strong><span>{c.description}</span><code>{JSON.stringify(c.config_changes, null, 2)}</code><span className="correction-finding">{c.finding_ids.length} linked finding(s) · {c.requires_approval ? "requires approval" : "approval not required"}</span></span></label>; })}{!corrections.corrections.length && <Empty title="No corrections proposed" body="The backend did not propose configuration changes for this run." />}</div>
+            </article>
+            <aside className="card approval-summary"><PanelTitle eyebrow="APPROVAL SUMMARY" title="Selected configuration" /><div className="approval-count"><span>Selected proposals</span><strong>{selectedCorrections.length} / {corrections.corrections.length}</strong></div><pre className="config-preview">{JSON.stringify(Object.assign({}, ...corrections.corrections.filter(c => selectedCorrections.includes(c.correction_id)).map(c => c.config_changes)), null, 2) || "{}"}</pre><div className="info-note"><AlertCircle size={15} /><span>Proposals are recommendations, not guarantees. Effectiveness is evaluated only after replay.</span></div><button className="btn btn-primary full-width" disabled={!selectedCorrections.length || !!busy || !run} onClick={() => void replay()}><ShieldCheck size={15} /> Approve &amp; replay <ArrowRight size={15} /></button><p className="micro-copy">A confirmation dialog will appear before the backend receives the approved changes.</p></aside></div>
+          </>}
+        </section>}
+
+        {page === "Replay Comparison" && <section className="page-section">
+          <div className="page-heading compact-heading"><div><div className="eyebrow">POST-REPLAY VERIFICATION</div><h1>Replay <span className="heading-accent">Comparison</span></h1><p>Compare baseline and corrected runs using the backend's measured response.</p></div>{comparison && <StatusPill tone={comparison.regression ? "red" : "green"}>{comparison.regression ? "Regression detected" : "No regression reported"}</StatusPill>}</div>
+          {!comparison ? <article className="card"><Empty title="No comparison available" body="Approve corrections and replay a controlled task. The comparison will be loaded from the backend." /><div className="center-action"><button className="btn btn-primary" onClick={() => setPage("Corrections")}>Review corrections</button></div></article> : <>
+            {comparison.regression && <div className="regression-banner"><AlertCircle size={20} /><div><strong>Regression detected</strong><p>{comparison.outcome_change ?? "The corrected run regressed."} Review the changes before relying on this configuration.</p></div></div>}
+            <div className="comparison-outcome"><div className="outcome-side"><span>BASELINE</span><strong>{human(comparison.baseline?.task_outcome ?? "unknown")}</strong><small>{comparison.baseline?.run_id}</small></div><div className="outcome-arrow"><ArrowRight size={22} /><span>REPLAY</span></div><div className={`outcome-side ${comparison.regression ? "outcome-regression" : "outcome-corrected"}`}><span>CORRECTED RUN</span><strong>{human(comparison.corrected?.task_outcome ?? "unknown")}</strong><small>{comparison.corrected?.run_id}</small></div></div>
+            <div className="metric-grid comparison-metrics"><Metric label="Tool calls" value={`${fmt(comparison.baseline?.tool_call_count)} ? ${fmt(comparison.corrected?.tool_call_count)}`} detail={`Delta ${fmt(comparison.tool_call_delta)}`} icon={Workflow} tone="blue" /><Metric label="Findings" value={`${fmt(comparison.baseline?.finding_count)} ? ${fmt(comparison.corrected?.finding_count)}`} detail={`${comparison.findings_resolved?.length ?? 0} resolved · ${comparison.findings_remaining?.length ?? 0} remaining`} icon={ShieldCheck} tone="green" /><Metric label="Duration" value={`${fmt(comparison.baseline?.duration_ms, " ms")} ? ${fmt(comparison.corrected?.duration_ms, " ms")}`} detail="Simulated duration, not wall-clock measurement" icon={Clock3} tone="purple" /><Metric label="Verification" value={`${(comparison.verifications ?? []).filter((v: any) => v.verification_status === "fix_verified").length} verified`} detail="Only backend verification is authoritative" icon={CheckCircle2} tone="green" /></div>
+            <article className="card verification-card"><PanelTitle eyebrow="VERIFICATION RESULTS" title="Finding-by-finding status" /><div className="table-scroll"><table><thead><tr><th>Finding category</th><th>Verification</th></tr></thead><tbody>{(comparison.verifications ?? []).map((v: any, i: number) => <tr key={`${v.finding_id}-${i}`}><td><strong>{human(v.category)}</strong><small>{v.finding_id}</small></td><td><StatusPill tone={v.verification_status === "fix_verified" ? "green" : v.verification_status === "fix_not_effective" ? "red" : "amber"}>{human(v.verification_status)}</StatusPill></td></tr>)}</tbody></table></div>{comparison.findings_introduced?.length > 0 && <div className="warning-note"><AlertCircle size={15} /> Newly introduced findings: {comparison.findings_introduced.map(human).join(", ")}</div>}<div className="data-source-note">Data source: {comparison.data_source ?? "Not specified by API"}</div></article>
+          </>}
+        </section>}
+
+        {page === "Benchmarks" && <section className="page-section">
+          <div className="page-heading compact-heading"><div><div className="eyebrow">EVALUATION &amp; LIMITATIONS</div><h1>Benchmark <span className="heading-accent">Lab</span></h1><p>Inspect live detector performance, split-specific metrics, and known failure cases.</p></div><button className="btn btn-secondary" disabled={!!busy} onClick={() => void action("Refreshing benchmark", api.benchmark, setBenchmark)}><RefreshCw size={14} /> Recompute live</button></div>
+          {benchmark && <><div className="benchmark-source-banner"><div><span className="source-dot" /><strong>Live benchmark results</strong><span>Recomputed by the backend on each request.</span></div><StatusPill tone="green">LIVE</StatusPill></div>
+            <div className="metric-grid"><Metric label="Precision" value={pct(overall?.precision)} detail={`${fmt(overall?.tp)} true positives · ${fmt(overall?.fp)} false positives`} icon={TargetIcon} tone="purple" /><Metric label="Recall" value={pct(overall?.recall)} detail={`${fmt(overall?.fn)} false negatives`} icon={Activity} tone="green" /><Metric label="False positive rate" value={pct(overall?.false_positive_rate)} detail={`${fmt(overall?.tn)} true negatives`} icon={ShieldAlert} tone="amber" /><Metric label="Evidence hit rate" value={pct(overall?.evidence_hit_rate)} detail={`${fmt(overall?.exact_match_scenarios)} exact-match scenarios`} icon={ShieldCheck} tone="blue" /></div>
+            <div className="overview-grid benchmark-split-grid"><article className="card"><PanelTitle eyebrow="DEVELOPMENT SPLIT" title="Dev results" /><div className="split-big">{pct(dev?.recall)}<span> recall</span></div><div className="split-stats"><div><span>Precision</span><strong>{pct(dev?.precision)}</strong></div><div><span>Scenarios</span><strong>{fmt(dev?.scenarios)}</strong></div><div><span>False positives</span><strong>{fmt(dev?.fp)}</strong></div><div><span>False negatives</span><strong>{fmt(dev?.fn)}</strong></div></div><p className="micro-copy">Development results describe the development split, not generalization to unseen cases.</p></article><article className="card"><PanelTitle eyebrow="HELD-OUT SPLIT" title="Held-out results" /><div className="split-big">{pct(heldOut?.recall)}<span> recall</span></div><div className="split-stats"><div><span>Precision</span><strong>{pct(heldOut?.precision)}</strong></div><div><span>Scenarios</span><strong>{fmt(heldOut?.scenarios)}</strong></div><div><span>False positives</span><strong>{fmt(heldOut?.fp)}</strong></div><div><span>False negatives</span><strong>{fmt(heldOut?.fn)}</strong></div></div><p className="micro-copy">The held-out set is small and not blind; treat these values as limited evidence.</p></article></div>
+            <article className="card category-card"><PanelTitle eyebrow="DETECTION COVERAGE" title="Per-category performance" /><div className="category-table-wrap"><table><thead><tr><th>Category</th><th>Precision</th><th>Recall</th><th>False positives</th><th>Misses</th></tr></thead><tbody>{Object.entries(overall?.per_category ?? {}).map(([name, data]: [string, any]) => <tr key={name}><td><strong>{human(name)}</strong></td><td>{pct(data.precision)}</td><td><div className="table-meter"><span style={{ width: `${Math.max(0, Math.min(100, Number(data.recall ?? 0) * 100))}%` }} /></div>{pct(data.recall)}</td><td>{fmt(data.fp)}</td><td>{fmt(data.fn)}</td></tr>)}</tbody></table></div></article>
+            <article className="card scenario-results-card"><PanelTitle eyebrow="LABELLED SCENARIO SET" title="Scenario browser" action={<StatusPill>{scenarios.length} total</StatusPill>} /><div className="search-box"><Search size={15} /><input placeholder="Filter scenarios…" value={query} onChange={e => setQuery(e.target.value)} /></div><div className="scenario-list">{visibleScenarios.map(s => <div className="scenario-list-row" key={s.scenario_id}><div className="scenario-icon"><FileSearch size={16} /></div><div className="scenario-list-copy"><strong>{s.scenario_id}</strong><p>{s.description}</p><div className="tag-row"><StatusPill>{s.split}</StatusPill><span className="muted-copy">{s.ground_truth_categories.map(human).join(", ") || "No labelled failure category"}</span></div></div><button className="mini-button" disabled={!!busy} onClick={() => void loadScenario(s.scenario_id)}>Inspect</button></div>)}</div></article>
+            {misses.length > 0 && <article className="card misses-card"><PanelTitle eyebrow="ERROR ANALYSIS" title="Known misses and false alarms" action={<StatusPill tone="red">{misses.length} affected</StatusPill>} /><p className="panel-description">These are scenario results explicitly marked with false positives or false negatives by the live benchmark response.</p>{misses.map((s: any, i: number) => <div className="miss-row" key={s.scenario_id ?? i}><div className="miss-icon"><AlertCircle size={16} /></div><div><strong>{s.scenario_id ?? "Scenario"}</strong><p>{s.description ?? s.notes ?? "See the scenario response for details."}</p><div className="tag-row">{(s.false_positives ?? []).map((x: any, j: number) => <StatusPill key={`fp${j}`} tone="red">FP: {typeof x === "string" ? human(x) : JSON.stringify(x)}</StatusPill>)}{(s.false_negatives ?? []).map((x: any, j: number) => <StatusPill key={`fn${j}`} tone="amber">FN: {typeof x === "string" ? human(x) : JSON.stringify(x)}</StatusPill>)}</div></div></div>)}</article>}
+            {Array.isArray(benchmark.limitations) && <article className="card limitations-card"><PanelTitle eyebrow="INTERPRETATION" title="Benchmark limitations" />{benchmark.limitations.map((l: any, i: number) => <div className="limitation-row" key={i}><AlertCircle size={15} /><span>{typeof l === "string" ? l : JSON.stringify(l)}</span></div>)}</article>}
+            <div className="data-source-note">Data source: {benchmark.data_source ?? "Live API response; source not specified"} · Recorded scenarios: {fmt(benchmark.total_cases)}</div>
+          </>}
+          {!benchmark && <article className="card"><Empty title="Benchmark unavailable" body="Refresh the live benchmark endpoint after checking backend health." /><div className="center-action"><button className="btn btn-primary" onClick={() => void refreshOverview()}>Retry</button></div></article>}
+          {savedBenchmark && <details className="saved-results"><summary>Inspect saved benchmark snapshot <ChevronDown size={14} /></summary><p>Saved results may be older than the current code. These values are not substituted for live results.</p><pre>{JSON.stringify({ data_source: savedBenchmark.data_source, benchmark_id: savedBenchmark.benchmark_id, total_cases: savedBenchmark.total_cases }, null, 2)}</pre></details>}
+        </section>}
+
+        {page === "Settings" && <section className="page-section">
+          <div className="page-heading compact-heading"><div><div className="eyebrow">ENVIRONMENT &amp; DISCLOSURES</div><h1>Application <span className="heading-accent">Settings</span></h1><p>Review the current connection and the capabilities of this research prototype.</p></div></div>
+          <div className="settings-grid"><article className="card settings-card"><PanelTitle eyebrow="CONNECTION" title="Backend API" /><div className="settings-row"><div><strong>API base URL</strong><p>Configured with VITE_API_URL</p></div><code>{import.meta.env.VITE_API_URL || "http://127.0.0.1:8000"}</code></div><div className="settings-row"><div><strong>Health status</strong><p>GET /api/health</p></div><StatusPill tone={health === "online" ? "green" : "red"}>{health}</StatusPill></div><button className="btn btn-secondary" onClick={() => void refreshOverview()}><RefreshCw size={14} /> Check connection</button></article>
+            <article className="card settings-card"><PanelTitle eyebrow="MODEL DISCLOSURE" title="What powers TraceMind?" /><div className="disclosure-item"><div className="disclosure-icon"><Code2 size={17} /></div><div><strong>Rule-based detection</strong><p>Findings are generated by explicit detector logic. The explanation source is labelled by the API.</p></div></div><div className="disclosure-item"><div className="disclosure-icon"><Workflow size={17} /></div><div><strong>Deterministic simulated runner</strong><p>The controlled runner uses simulated tasks and mock tools. It is not a live external agent.</p></div></div><div className="disclosure-item"><div className="disclosure-icon"><Clock3 size={17} /></div><div><strong>Simulated durations</strong><p>Run durations are simulated and should not be interpreted as real wall-clock performance.</p></div></div><div className="disclosure-item"><div className="disclosure-icon"><Sparkles size={17} /></div><div><strong>LLM explanations: not enabled</strong><p>There is no LLM integration in this backend. No API-key form or inactive toggle is presented.</p></div></div></article></div>
+        </section>}
+
+        <footer className="app-footer"><span>TraceMind AI <span className="footer-version">v0.5.0</span></span><span>Built for transparent agent reliability · Rule-based detection</span></footer>
+      </div>
+    </main>
+  </div>;
+}
+
+function TargetIcon({ size = 18 }: { size?: number }) {
+  return <span className="target-icon"><CircleDot size={size} /></span>;
+}
